@@ -159,7 +159,7 @@ const ListPage = ({ searchParams }:{searchParams: any}) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:3000/api/v1/product/", {
+        const response = await fetch("http://127.0.0.1:8080/api/v1/product/", {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

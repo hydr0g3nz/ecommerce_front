@@ -83,7 +83,7 @@ const EditProductPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://127.0.0.1:3000/api/v1/product/${productId}`
+        `http://127.0.0.1:8080/api/v1/product/${productId}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch product");
@@ -115,7 +115,7 @@ const uploadImage = async (file: File) => {
   formData.append("image", file);
 
   const response = await fetch(
-    "http://127.0.0.1:3000/api/v1/product/image",
+    "http://127.0.0.1:8080/api/v1/product/image",
     {
       method: "POST",
       body: formData,
@@ -142,17 +142,20 @@ const uploadImage = async (file: File) => {
     }));
   };
   const handleCropComplete = useCallback(
-    (croppedArea: any, croppedAreaPixels: any) => {
+    (croppedArea: File, croppedAreaPixels: any) => {
       // Here you would typically send the cropped image data to your server
       // For this example, we'll just add the original image to the product
-      setProduct((prev) => ({
-        ...prev,
-        images: [...prev.images, selectedImage as string],
-      }));
+      // setProduct((prev) => ({
+      //   ...prev,
+      //   images: [...prev.images, selectedImage as string],
+      // }));
+      // file = ;
+      uploadImage(croppedArea);
       setCropDialogOpen(false);
       setSelectedImage(null);
     },
-    [selectedImage]
+    []
+    // [selectedImage]
   );
 
   const removeImage = (index: number) => {
@@ -170,7 +173,6 @@ const uploadImage = async (file: File) => {
         setCropDialogOpen(true);
       };
       reader.readAsDataURL(file);
-      uploadImage(file);
     }
   };
   const handleVariationChange = (
@@ -220,7 +222,7 @@ const uploadImage = async (file: File) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://127.0.0.1:3000/api/v1/product/`, {
+      const response = await fetch(`http://127.0.0.1:8080/api/v1/product/`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(product),
@@ -255,7 +257,7 @@ const uploadImage = async (file: File) => {
             {product.images.map((image, index) => (
               <div key={index} className="relative">
                 <Image
-                  src={ "http://127.0.0.1:3000/api/v1/images/products/" + image}
+                  src={ "http://127.0.0.1:8080/api/v1/images/products/" + image}
                   alt={`Product image ${index + 1}`}
                   width={200}
                   height={250}
