@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import Image from "next/image";
-import ReactCrop, { Crop } from "react-image-crop";
+import NextImage from "next/image";
+import ReactCrop, { Crop, PixelCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -66,10 +66,10 @@ const EditProductPage: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [crop, setCrop] = useState<Crop>({
     unit: "%",
-    width: 80,
-    height: 80,
-    x: 0,
-    y: 0,
+    width: 50,
+    height: 50,
+    x: 50,
+    y: 50,
     // aspectRatio: 4 / 5,
   });
 
@@ -114,20 +114,24 @@ const uploadImage = async (file: File) => {
   const formData = new FormData();
   formData.append("image", file);
 
-  const response = await fetch(
-    "http://127.0.0.1:8080/api/v1/product/image",
-    {
-      method: "POST",
-      body: formData,
+  try {
+    const response = await fetch(
+      "http://127.0.0.1:8080/api/v1/product/image",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+    if (response.ok) {
+      const data = await response.json();
+      setProduct((prev) => ({ ...prev, images: [...prev.images, data.filename] }));
+    } else {
+      console.error("Failed to upload image:", response.status, response.statusText);
     }
-  );
-  if (response.ok) {
-    const data = await response.json();
-    setProduct((prev) => ({ ...prev, images: [...prev.images, data.filename] }));
-  } else {
-    console.error("Failed to upload image:", response.status, response.statusText);
+  } catch (error) {
+    console.error("Error uploading image:", error);
   }
-}
+};
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -141,22 +145,20 @@ const uploadImage = async (file: File) => {
       specifications: { ...prev.specifications, [key]: value },
     }));
   };
-  const handleCropComplete = useCallback(
-    (croppedArea: File, croppedAreaPixels: any) => {
-      // Here you would typically send the cropped image data to your server
-      // For this example, we'll just add the original image to the product
-      // setProduct((prev) => ({
-      //   ...prev,
-      //   images: [...prev.images, selectedImage as string],
-      // }));
-      // file = ;
-      uploadImage(croppedArea);
-      setCropDialogOpen(false);
-      setSelectedImage(null);
-    },
-    []
-    // [selectedImage]
-  );
+  const handleCropComplete = useCallback(async (croppedArea: Crop, croppedAreaPixels: PixelCrop) => {
+    if (selectedImage) {
+      const img = new Image();
+      img.src = selectedImage;
+
+      img.onload = async () => {
+        const croppedImageBlob = await cropImage(img, croppedAreaPixels);
+        const file = new File([croppedImageBlob], "cropped_image.jpg", { type: "image/jpeg" });
+        await uploadImage(file);
+        setCropDialogOpen(false);
+        setSelectedImage(null);
+      };
+    }
+  }, [selectedImage]);
 
   const removeImage = (index: number) => {
     setProduct((prev) => ({
@@ -174,6 +176,34 @@ const uploadImage = async (file: File) => {
       };
       reader.readAsDataURL(file);
     }
+  };
+  const cropImage = (image: HTMLImageElement, crop: PixelCrop): Promise<Blob> => {
+    const canvas = document.createElement('canvas');
+    const scaleX = image.naturalWidth / image.width;
+    const scaleY = image.naturalHeight / image.height;
+    canvas.width = crop.width;
+    canvas.height = crop.height;
+    const ctx = canvas.getContext('2d');
+
+    if (ctx) {
+      ctx.drawImage(
+        image,
+        crop.x * scaleX,
+        crop.y * scaleY,
+        crop.width * scaleX,
+        crop.height * scaleY,
+        0,
+        0,
+        crop.width,
+        crop.height
+      );
+    }
+
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob);
+      }, 'image/jpeg');
+    });
   };
   const handleVariationChange = (
     index: number,
@@ -256,7 +286,7 @@ const uploadImage = async (file: File) => {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {product.images.map((image, index) => (
               <div key={index} className="relative">
-                <Image
+                <NextImage
                   src={ "http://127.0.0.1:8080/api/v1/images/products/" + image}
                   alt={`Product image ${index + 1}`}
                   width={200}
@@ -477,10 +507,10 @@ const uploadImage = async (file: File) => {
           </DialogHeader>
           {selectedImage && (
             <ReactCrop crop={crop} onChange={(c) => setCrop(c)} aspect={4 / 5}>
-              <Image src={selectedImage} width={200} height={250}  alt="Crop me" />
+              <NextImage src={selectedImage} width={400} height={400}  alt="Crop me" />
             </ReactCrop>
           )}
-          <Button onClick={() => handleCropComplete(crop, null)}>
+          <Button onClick={() => handleCropComplete(crop, crop as PixelCrop)}>
             Confirm Crop
           </Button>
         </DialogContent>
