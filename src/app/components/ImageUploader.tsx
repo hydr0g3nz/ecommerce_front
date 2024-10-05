@@ -4,18 +4,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X, Upload } from "lucide-react";
 import ImageCropDialog from "@/components/ImageCropDialog";
-
+import { Product } from "@/types/product";
 interface ImageUploaderProps {
   images: string[];
-  onUpdate: (images: Blob[]) => void;
+  imagesUpload: Blob[];
+  setProduct: React.Dispatch<React.SetStateAction<Product>>;
+  newImages: React.Dispatch<React.SetStateAction<Blob[]>>;
 }
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({ images, onUpdate }) => {
+const ImageUploader: React.FC<ImageUploaderProps> = ({
+  images,
+  imagesUpload,
+  setProduct,
+  newImages,
+}) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
-
   const removeImage = (index: number) => {
-    onUpdate(images.filter((_, i) => i !== index));
+    setProduct((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,9 +39,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ images, onUpdate }) => {
     }
   };
 
-  const handleCropComplete = async (croppedImageBlob: Blob) => {
-  
-
+  const handleCropComplete =  (croppedImageBlob: Blob) => {
+    newImages([...imagesUpload, croppedImageBlob]);
     setCropDialogOpen(false);
     setSelectedImage(null);
   };
@@ -55,6 +63,26 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ images, onUpdate }) => {
               size="icon"
               className="absolute top-2 right-2"
               onClick={() => removeImage(index)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+        {imagesUpload.map((image, index) => (
+          <div key={index} className="relative">
+            <NextImage
+              src={URL.createObjectURL(image)}
+              alt={`Product image ${index + 1}`}
+              width={200}
+              height={250}
+              className="object-cover rounded"
+            />
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="absolute top-2 right-2"
+              onClick={() => newImages(imagesUpload.filter((_, i) => i !== index))}
             >
               <X className="h-4 w-4" />
             </Button>
