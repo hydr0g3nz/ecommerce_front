@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import NextImage from "next/image";
 import ReactCrop, { Crop, PixelCrop } from "react-image-crop";
@@ -72,7 +72,7 @@ const EditProductPage: React.FC = () => {
     y: 50,
     // aspectRatio: 4 / 5,
   });
-
+  const imageRef = useRef<HTMLImageElement>(null);
   useEffect(() => {
     if (id) {
       fetchProduct(id);
@@ -109,29 +109,36 @@ const EditProductPage: React.FC = () => {
       setLoading(false);
     }
   };
-//upload image
-const uploadImage = async (file: File) => {
-  const formData = new FormData();
-  formData.append("image", file);
+  //upload image
+  const uploadImage = async (file: File) => {
+    const formData = new FormData();
+    formData.append("image", file);
 
-  try {
-    const response = await fetch(
-      "http://127.0.0.1:8080/api/v1/product/image",
-      {
-        method: "POST",
-        body: formData,
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8080/api/v1/product/image",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setProduct((prev) => ({
+          ...prev,
+          images: [...prev.images, data.filename],
+        }));
+      } else {
+        console.error(
+          "Failed to upload image:",
+          response.status,
+          response.statusText
+        );
       }
-    );
-    if (response.ok) {
-      const data = await response.json();
-      setProduct((prev) => ({ ...prev, images: [...prev.images, data.filename] }));
-    } else {
-      console.error("Failed to upload image:", response.status, response.statusText);
+    } catch (error) {
+      console.error("Error uploading image:", error);
     }
-  } catch (error) {
-    console.error("Error uploading image:", error);
-  }
-};
+  };
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -145,20 +152,32 @@ const uploadImage = async (file: File) => {
       specifications: { ...prev.specifications, [key]: value },
     }));
   };
-  const handleCropComplete = useCallback(async (croppedArea: Crop, croppedAreaPixels: PixelCrop) => {
-    if (selectedImage) {
-      const img = new Image();
-      img.src = selectedImage;
-
-      img.onload = async () => {
-        const croppedImageBlob = await cropImage(img, croppedAreaPixels);
-        const file = new File([croppedImageBlob], "cropped_image.jpg", { type: "image/jpeg" });
-        await uploadImage(file);
-        setCropDialogOpen(false);
-        setSelectedImage(null);
-      };
-    }
-  }, [selectedImage]);
+  const handleCropComplete = useCallback(
+    async (pixelCrop: PixelCrop) => {
+      console.log("handleCropComplete");
+      if (
+        imageRef.current &&
+        imageRef.current.width &&
+        imageRef.current.height
+      ) {
+        if (
+          imageRef.current &&
+          imageRef.current.width &&
+          imageRef.current.height
+        ) {
+          const croppedImageBlob = await cropImage(imageRef.current, pixelCrop);
+          const file = new File([croppedImageBlob], "cropped_image.jpg", {
+            type: "image/jpeg",
+          });
+          await uploadImage(file);
+          setCropDialogOpen(false);
+          setSelectedImage(null);
+        }
+      }
+      console.log("handleCropComplete end");
+    },
+    [imageRef.current]
+  );
 
   const removeImage = (index: number) => {
     setProduct((prev) => ({
@@ -177,32 +196,59 @@ const uploadImage = async (file: File) => {
       reader.readAsDataURL(file);
     }
   };
-  const cropImage = (image: HTMLImageElement, crop: PixelCrop): Promise<Blob> => {
-    const canvas = document.createElement('canvas');
+
+  const cropImage = (
+    image: HTMLImageElement,
+    pixelCrop: PixelCrop
+  ): Promise<Blob> => {
+    const canvas = document.createElement("canvas");
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
-    canvas.width = crop.width;
-    canvas.height = crop.height;
-    const ctx = canvas.getContext('2d');
+    canvas.width = pixelCrop.width;
+    canvas.height = pixelCrop.height;
+    const ctx = canvas.getContext("2d");
 
     if (ctx) {
       ctx.drawImage(
         image,
-        crop.x * scaleX,
-        crop.y * scaleY,
-        crop.width * scaleX,
-        crop.height * scaleY,
+        // crop.x ,
+        // crop.y ,
+        // crop.width ,
+        // crop.height ,
+        pixelCrop.x * scaleX,
+        pixelCrop.y * scaleY,
+        pixelCrop.width * scaleX,
+        pixelCrop.height * scaleY,
         0,
         0,
-        crop.width,
-        crop.height
+        pixelCrop.width,
+        pixelCrop.height
       );
     }
-
-    return new Promise((resolve) => {
+    console.log(
+      "crop.width",
+      pixelCrop.width,
+      "pixelCrop.height",
+      pixelCrop.height
+    );
+    console.log("scaleX", scaleX, "scaleY", scaleY);
+    console.log("pixelCrop.x", pixelCrop.x, "pixelCrop.y", pixelCrop.y);
+    console.log("width", image.width, "height", image.height);
+    console.log(
+      "naturalWidth",
+      image.naturalWidth,
+      "naturalHeight",
+      image.naturalHeight
+    );
+    return new Promise((resolve, reject) => {
       canvas.toBlob((blob) => {
-        if (blob) resolve(blob);
-      }, 'image/jpeg');
+        if (!blob) {
+          reject(new Error("Canvas is empty"));
+          return;
+        }
+
+        resolve(blob);
+      }, "image/jpeg");
     });
   };
   const handleVariationChange = (
@@ -287,7 +333,7 @@ const uploadImage = async (file: File) => {
             {product.images.map((image, index) => (
               <div key={index} className="relative">
                 <NextImage
-                  src={ "http://127.0.0.1:8080/api/v1/images/products/" + image}
+                  src={"http://127.0.0.1:8080/api/v1/images/products/" + image}
                   alt={`Product image ${index + 1}`}
                   width={200}
                   height={250}
@@ -506,11 +552,22 @@ const uploadImage = async (file: File) => {
             <DialogTitle>Crop Image</DialogTitle>
           </DialogHeader>
           {selectedImage && (
-            <ReactCrop crop={crop} onChange={(c) => setCrop(c)} aspect={4 / 5}>
-              <NextImage src={selectedImage} width={400} height={400}  alt="Crop me" />
-            </ReactCrop>
+            <>
+              <ReactCrop
+                crop={crop}
+                onChange={(c) => setCrop(c)}
+                aspect={4 / 5}
+              >
+                <img
+                  src={selectedImage}
+                  ref={imageRef}
+                  style={{ width: "200px", height: "auto" }}
+                  alt="Crop me"
+                />
+              </ReactCrop>
+            </>
           )}
-          <Button onClick={() => handleCropComplete(crop, crop as PixelCrop)}>
+          <Button onClick={() => handleCropComplete(crop as PixelCrop)}>
             Confirm Crop
           </Button>
         </DialogContent>
