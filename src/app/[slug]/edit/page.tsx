@@ -27,8 +27,6 @@ const EditProductPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto mt-8 p-4 space-y-6">
       <h1 className="text-3xl font-bold mb-6">Edit Product</h1>
-      {JSON.stringify(product.images)}
-      {JSON.stringify(imagesUpload)}
       <Card>
         <CardHeader>
           <h2 className="text-xl font-semibold">Images</h2>

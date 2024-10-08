@@ -55,7 +55,6 @@ export const useProduct = (id: string) => {
             return await updatedProductImage(image);
           })
         );
-  
         console.log(imgIds);
   
         // Return the updated product with new images
