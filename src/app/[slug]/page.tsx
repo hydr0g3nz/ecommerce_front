@@ -96,11 +96,11 @@ const SinglePage = async ({ params }: { params: { slug: string } }) => {
   return (
     <div className="min-h-max px-4 md:px-8 lg:px-16 xl:px-32 2xl:px-64 relative flex flex-col lg:flex-row gap-16">
       {/* IMG */}
-      <div className="flex flex-col grow lg:w-1/2 lg:sticky top-20">
+      <div className="flex flex-col grow lg:w-7/12 lg:sticky top-20">
         <ProductImages items={product.media?.items} />
       </div>
       {/* TEXTS */}
-      <div className="w-full lg:w-1/2 flex flex-col gap-6">
+      <div className="w-full lg:w-5/12 flex flex-col gap-6">
         <h1 className="text-4xl font-medium">{product.name}</h1>
         <p className="text-gray-500">{product.description}</p>
         <div className="h-[2px] bg-gray-100" />
