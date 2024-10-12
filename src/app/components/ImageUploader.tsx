@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import NextImage from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +28,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   //     images: prev.images.filter((_, i) => i !== index),
   //   }));
   // };
-
+useEffect(() => {
+  if (!variant.images) {
+    variant.images = [];
+  }
+  if (!variant.blobs) {
+    variant.blobs = [];
+  }
+}, []);
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -42,15 +49,17 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
 
   const handleCropComplete = (croppedImageBlob: Blob) => {
-    onChange(index, "blobs", [...variant.blobs, croppedImageBlob]);
+    console.log("variant", variant);
+    onChange(index, "blobs", [...variant?.blobs, croppedImageBlob]);
     setCropDialogOpen(false);
     setSelectedImage(null);
   };
 
   return (
     <>
+    {JSON.stringify(variant)}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {variant.images.map((image, index) => (
+        {variant.images?.map((image, index) => (
           <div key={index} className="relative">
             <NextImage
               src={`http://127.0.0.1:8080/api/v1/images/products/${image}`}
@@ -70,7 +79,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             </Button>
           </div>
         ))}
-        {variant.blobs.map((image, idx) => (
+        {variant.blobs?.map((image, idx) => (
           <div key={idx} className="relative">
             <NextImage
               src={URL.createObjectURL(image)}

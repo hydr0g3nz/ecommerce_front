@@ -10,9 +10,14 @@ import { Card } from "@/components/ui/card";
 interface ProductFormProps {
   product: Product;
   onSubmit: (product: Product) => void;
+  mode: string;
 }
 
-const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit }) => {
+const ProductForm: React.FC<ProductFormProps> = ({
+  product,
+  onSubmit,
+  mode,
+}) => {
   const {
     formData,
     handleInputChange,
@@ -23,13 +28,16 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit }) => {
     addSpecification,
     removeSpecification,
     beforeUploadProduct,
+    setFormData,
   } = useProductForm(product);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formData);
+    console.log("before", formData);
     let updatedProduct = await beforeUploadProduct();
+    console.log("after", updatedProduct);
     onSubmit(updatedProduct);
+    // setFormData((prev) => ({ ...prev, ...updatedProduct }));
   };
 
   return (
@@ -54,7 +62,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit }) => {
         />
       </Card>
       <Button type="submit" className="w-full">
-        Update Product
+        {mode === "add" ? "Create Product" : "Update Product"}
       </Button>
     </form>
   );

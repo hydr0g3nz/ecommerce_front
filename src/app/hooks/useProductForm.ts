@@ -7,18 +7,28 @@ export const useProductForm = (initialProduct: Product) => {
     let updatedProduct = { ...formData };
 
     const uploadedImageIds = await Promise.all(
-      formData.variations.map((v) => Promise.all(v.blobs.map((b) => uploadProductImage(b))))
+      formData.variations?.map((v) =>
+        Promise.all(v.blobs?.map((b) => uploadProductImage(b)))
+      )
     );
-    console.log("Uploaded image IDs:", uploadedImageIds);
     for (let i = 0; i < formData.variations.length; i++) {
       const variation = formData.variations[i];
-      const updatedVariation = { ...variation, images: [...variation.images, ...uploadedImageIds[i]] };
+      const updatedVariation = {
+        ...variation,
+        images: [...variation.images, ...uploadedImageIds[i]],
+        blobs: [],
+      };
       updatedProduct = {
         ...updatedProduct,
-        variations: [...updatedProduct.variations, updatedVariation],
+        variations: updatedProduct.variations.map((v, j) =>
+          i === j ? updatedVariation : v
+        ),
       };
     }
-
+    setFormData((prev) => ({
+      ...prev,
+      ...updatedProduct,
+    }))
     return updatedProduct;
   };
   const uploadProductImage = async (image: Blob): Promise<string> => {
@@ -71,7 +81,7 @@ export const useProductForm = (initialProduct: Product) => {
 
   const addVariation = () => {
     setFormData((prev) => {
-      const newVariations = [...prev.variations];
+      // const newVariations = [...prev.variations];
       const emptyVariation = {
         sku: "",
         price: 0,
@@ -82,7 +92,7 @@ export const useProductForm = (initialProduct: Product) => {
         sale: 0,
         blobs: [],
       };
-      return { ...prev, variations: [...newVariations, emptyVariation] };
+      return { ...prev, variations: [...prev.variations, emptyVariation] };
     });
   };
 
@@ -118,5 +128,6 @@ export const useProductForm = (initialProduct: Product) => {
     addSpecification,
     removeSpecification,
     beforeUploadProduct,
+    setFormData
   };
 };
