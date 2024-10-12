@@ -4,6 +4,9 @@ export interface Variation {
     size: string;
     color: string;
     price: number;
+    images: string[];
+    sale: number;
+    blobs: Blob[];
   }
   
   export interface Product {
@@ -16,5 +19,9 @@ export interface Variation {
     specifications: { [key: string]: string };
     review_ids: string[];
     rating: number;
-    images: string[];
   }
+
+export interface VariationImageBlob {
+  variant: string;
+  images: Blob[];
+}

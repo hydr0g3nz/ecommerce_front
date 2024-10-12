@@ -4,28 +4,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X, Upload } from "lucide-react";
 import ImageCropDialog from "@/components/ImageCropDialog";
-import { Product } from "@/types/product";
+import { Product, Variation } from "@/types/product";
 interface ImageUploaderProps {
-  images: string[];
-  imagesUpload: Blob[];
-  setProduct: React.Dispatch<React.SetStateAction<Product>>;
-  newImages: React.Dispatch<React.SetStateAction<Blob[]>>;
+  index: number;
+  variant: Variation;
+  onChange: (
+    index: number,
+    field: keyof Variation,
+    value: string | number | Blob[] | string[]
+  ) => void;
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({
-  images,
-  imagesUpload,
-  setProduct,
-  newImages,
+  index,
+  variant,
+  onChange,
 }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
-  const removeImage = (index: number) => {
-    setProduct((prev) => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }));
-  };
+  // const removeImage = (index: number) => {
+  //   setProduct((prev) => ({
+  //     ...prev,
+  //     images: prev.images.filter((_, i) => i !== index),
+  //   }));
+  // };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -39,8 +41,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
 
-  const handleCropComplete =  (croppedImageBlob: Blob) => {
-    newImages([...imagesUpload, croppedImageBlob]);
+  const handleCropComplete = (croppedImageBlob: Blob) => {
+    onChange(index, "blobs", [...variant.blobs, croppedImageBlob]);
     setCropDialogOpen(false);
     setSelectedImage(null);
   };
@@ -48,7 +50,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   return (
     <>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {images.map((image, index) => (
+        {variant.images.map((image, index) => (
           <div key={index} className="relative">
             <NextImage
               src={`http://127.0.0.1:8080/api/v1/images/products/${image}`}
@@ -62,17 +64,17 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               variant="destructive"
               size="icon"
               className="absolute top-2 right-2"
-              onClick={() => removeImage(index)}
+              // onClick={() => removeImage(index)}
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
         ))}
-        {imagesUpload.map((image, index) => (
-          <div key={index} className="relative">
+        {variant.blobs.map((image, idx) => (
+          <div key={idx} className="relative">
             <NextImage
               src={URL.createObjectURL(image)}
-              alt={`Product image ${index + 1}`}
+              alt={`Product image ${idx + 1}`}
               width={200}
               height={250}
               className="object-cover rounded"
@@ -82,7 +84,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               variant="destructive"
               size="icon"
               className="absolute top-2 right-2"
-              onClick={() => newImages(imagesUpload.filter((_, i) => i !== index))}
+              onClick={() =>
+                onChange(index, "blobs", variant.blobs.filter((_, i) => i !== idx))
+              }
             >
               <X className="h-4 w-4" />
             </Button>

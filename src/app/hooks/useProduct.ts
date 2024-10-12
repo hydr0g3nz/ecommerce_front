@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Product } from "@/types/product";
+import { Product, Variation, VariationImageBlob } from "@/types/product";
 
 export const useProduct = (id: string) => {
   const [product, setProduct] = useState<Product>({
@@ -12,9 +12,8 @@ export const useProduct = (id: string) => {
     specifications: {},
     review_ids: [],
     rating: 0,
-    images: [],
   });
-  const [imagesUpload, setImagesUpload] = useState<Blob[]>([]);
+  const [imagesUpload, setImagesUpload] = useState<VariationImageBlob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,64 +41,19 @@ export const useProduct = (id: string) => {
       setLoading(false);
     }
   };
-  const beforeUploadProduct = async (): Promise<Product> => {
-    console.log(imagesUpload);
-    
-    if (imagesUpload.length > 0) {
-      console.log("beforeUploadProduct");
-  
-      try {
-        const imgIds = await Promise.all(
-          imagesUpload.map(async (image) => {
-            console.log("image");
-            return await updatedProductImage(image);
-          })
-        );
-        console.log(imgIds);
-  
-        // Return the updated product with new images
-        return {
-          ...product,
-          images: [...product.images, ...imgIds],
-        };
-      } catch (error) {
-        console.error("Error uploading images:", error);
-        throw error;
-      }
-    } else {
-      console.log("no images");
-      return product; // Return the current product as is if no images are uploaded
-    }
+
+  const updatedVariantImages = (
+    product: Product,
+    sku: string,
+    newImages: string[]
+  ): Product => {
+    const updatedVariations = product.variations.map((v) =>
+      v.sku === sku ? { ...v, images: [...v.images, ...newImages] } : v
+    );
+    return { ...product, variations: updatedVariations };
   };
-  const updateProduct = async () => {
-    try {
-      const updatedProduct = await beforeUploadProduct();
-      console.log(updatedProduct);
-      await updateProductApi(updatedProduct); // Pass the updated product directly
-      setImagesUpload([]); // Reset the imagesUpload state
-    } catch (error) {
-      console.error("Error updating product:", error);
-    }
-  };
-  const updateProductApi   = async (updatedProduct: Product) => {
-    try {
-      console.log(product);
-      const response = await fetch(`http://127.0.0.1:8080/api/v1/product/`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedProduct),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to update product");
-      }
-      setProduct(updatedProduct);
-      alert("Product updated successfully");
-    } catch (error) {
-      console.error("Error updating product:", error);
-      setError("Failed to update product. Please try again.");
-    }
-  };
-  const updatedProductImage = async (image: Blob): Promise<string> => {
+
+  const uploadProductImage = async (image: Blob): Promise<string> => {
     const formData = new FormData();
     formData.append("image", image, "cropped_image.jpg");
 
@@ -111,20 +65,61 @@ export const useProduct = (id: string) => {
           body: formData,
         }
       );
-      if (response.ok) {
-        const data = await response.json();
-        return data.filename;
-      } else {
-        console.error(
-          "Failed to upload image:",
-          response.status,
-          response.statusText
-        );
+      if (!response.ok) {
         throw new Error("Failed to upload image");
       }
+      const data = await response.json();
+      return data.filename;
     } catch (error) {
       console.error("Error uploading image:", error);
-      return "";
+      throw error;
+    }
+  };
+
+  const beforeUploadProduct = async (): Promise<Product> => {
+    if (imagesUpload.length === 0) {
+      return product;
+    }
+
+    let updatedProduct = { ...product };
+
+    for (const variant of imagesUpload) {
+      const uploadedImageIds = await Promise.all(
+        variant.images.map((image) => uploadProductImage(image))
+      );
+      updatedProduct = updatedVariantImages(
+        updatedProduct,
+        variant.variant,
+        uploadedImageIds
+      );
+    }
+
+    return updatedProduct;
+  };
+
+  const updateProduct = async () => {
+    try {
+      setLoading(true);
+      const updatedProduct = await beforeUploadProduct();
+      await updateProductApi(updatedProduct);
+      setImagesUpload([]);
+      setProduct(updatedProduct);
+    } catch (error) {
+      console.error("Error updating product:", error);
+      setError("Failed to update product. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateProductApi = async (updatedProduct: Product) => {
+    const response = await fetch(`http://127.0.0.1:8080/api/v1/product/`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedProduct),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to update product");
     }
   };
 

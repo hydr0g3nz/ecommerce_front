@@ -13,11 +13,23 @@ interface ProductFormProps {
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit }) => {
-  const { formData, handleInputChange, handleSpecificationChange, handleVariationChange, addVariation, removeVariation, addSpecification, removeSpecification } = useProductForm(product);
+  const {
+    formData,
+    handleInputChange,
+    handleSpecificationChange,
+    handleVariationChange,
+    addVariation,
+    removeVariation,
+    addSpecification,
+    removeSpecification,
+    beforeUploadProduct,
+  } = useProductForm(product);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    console.log(formData);
+    let updatedProduct = await beforeUploadProduct();
+    onSubmit(updatedProduct);
   };
 
   return (

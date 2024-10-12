@@ -32,12 +32,12 @@ const EditProductPage: React.FC = () => {
           <h2 className="text-xl font-semibold">Images</h2>
         </CardHeader>
         <CardContent>
-          <ImageUploader
+          {/* <ImageUploader
             imagesUpload={imagesUpload}
             images={product.images}
             setProduct={setProduct}
             newImages={setImagesUpload}
-          />
+          /> */}
         </CardContent>
       </Card>
       <ProductForm product={product} onSubmit={updateProduct} />
