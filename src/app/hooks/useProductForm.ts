@@ -3,9 +3,24 @@ import { Product, Variation, VariationImageBlob } from "@/types/product";
 
 export const useProductForm = (initialProduct: Product) => {
   const [formData, setFormData] = useState<Product>(initialProduct);
+  const [deletedImages, setDeletedImages] = useState<string[]>([]);
   const beforeUploadProduct = async (): Promise<Product> => {
     let updatedProduct = { ...formData };
-
+    if (deletedImages.length > 0) {
+      try {
+        await Promise.all(
+          deletedImages.map((filename) => deleteProductImage(filename))
+        );
+      } catch (error) {
+        console.error("Error deleting images:", error);
+        if (error) {
+          const response = error as Response;
+          if (response.status >= 500) {
+            throw error;
+          }
+        }
+      }
+    }
     const uploadedImageIds = await Promise.all(
       formData.variations?.map((v) =>
         Promise.all(v.blobs?.map((b) => uploadProductImage(b)))
@@ -28,7 +43,7 @@ export const useProductForm = (initialProduct: Product) => {
     setFormData((prev) => ({
       ...prev,
       ...updatedProduct,
-    }))
+    }));
     return updatedProduct;
   };
   const uploadProductImage = async (image: Blob): Promise<string> => {
@@ -41,6 +56,24 @@ export const useProductForm = (initialProduct: Product) => {
         {
           method: "POST",
           body: formData,
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
+      }
+      const data = await response.json();
+      return data.filename;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
+  };
+  const deleteProductImage = async (filename: string): Promise<string> => {
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8080/api/v1/product/image/" + filename,
+        {
+          method: "DELETE",
         }
       );
       if (!response.ok) {
@@ -117,7 +150,12 @@ export const useProductForm = (initialProduct: Product) => {
       return { ...prev, specifications: newSpecs };
     });
   };
-
+  const removeImage = (varIdx: number, imgIdx: number) => {
+    setDeletedImages((prev) => [
+      ...prev,
+      formData.variations[varIdx].images[imgIdx],
+    ]);
+  };
   return {
     formData,
     handleInputChange,
@@ -127,7 +165,8 @@ export const useProductForm = (initialProduct: Product) => {
     removeVariation,
     addSpecification,
     removeSpecification,
+    removeImage,
     beforeUploadProduct,
-    setFormData
+    setFormData,
   };
 };

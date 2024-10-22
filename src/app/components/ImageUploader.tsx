@@ -23,18 +23,20 @@ type ImageUploaderProps = {
     field: keyof Variation,
     value: string | number | Blob[] | string[]
   ) => void;
+  onRemoveImage: (varIdx: number, imgIdx: number) => void;
 };
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({
   varIdx,
   variant,
   onChange,
+  onRemoveImage,
 }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const [crop, setCrop] = useState<Crop>();
   const imageRef = useRef<HTMLImageElement>(null);
-  
+
   // Initialize images and blobs in useEffect
   useEffect(() => {
     if (!variant.images) {
@@ -112,6 +114,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     const newArray = currentArray.filter((_, i) => i !== index);
     if (type === "images") {
       onChange(varIdx, type, newArray as string[]);
+      onRemoveImage(varIdx, index);
     } else if (type === "blobs") {
       onChange(varIdx, type, newArray as Blob[]);
     }
@@ -182,7 +185,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           <DialogHeader>
             <DialogTitle>Crop Image for Variation {varIdx}</DialogTitle>
             <DialogDescription>
-              Adjust the crop area to select the portion of the image you want to use
+              Adjust the crop area to select the portion of the image you want
+              to use
             </DialogDescription>
           </DialogHeader>
           {selectedImage && (
@@ -199,10 +203,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                   width={0}
                   height={0}
                   sizes="100vw"
-                  style={{ width: '100%', height: 'auto', maxHeight: '70vh' }}
+                  style={{ width: "100%", height: "auto", maxHeight: "70vh" }}
                 />
               </ReactCrop>
-              <Button 
+              <Button
                 onClick={handleCropComplete}
                 disabled={!crop}
                 className="w-full"

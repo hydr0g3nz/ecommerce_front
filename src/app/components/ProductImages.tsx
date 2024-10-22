@@ -10,9 +10,9 @@ const ProductImages: React.FC<ProductImagesProps> = ({ images }) => {
   const [index, setIndex] = useState(0);
   const [selectedImg, setSelectedImg] = useState(0);
   return (
-    <div className="flex grow gap-4">
+    <div className="flex grow gap-4  justify-end">
       {/* Thumbnail images */}
-      <div className="w-3/12 gap-2 flex flex-col content-start">
+      <div className="w-1/12 gap-2 flex flex-col content-start">
         {images?.map((url, i) => (
           <div
             className="relative cursor-pointer"
@@ -39,7 +39,7 @@ const ProductImages: React.FC<ProductImagesProps> = ({ images }) => {
         ))}
       </div>
       {/* Main image */}
-      <div className="">
+      <div className="min-w-[500px] ">
         <Image
           src={
             index !== -1
@@ -50,6 +50,7 @@ const ProductImages: React.FC<ProductImagesProps> = ({ images }) => {
           width={0}
           height={0}
           sizes="100%"
+          quality={100}
           style={{ width: "100%", height: "auto" }}
           className="rounded-md"
         />

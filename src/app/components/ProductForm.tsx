@@ -28,6 +28,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     addSpecification,
     removeSpecification,
     beforeUploadProduct,
+    removeImage,
     setFormData,
   } = useProductForm(product);
 
@@ -59,6 +60,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
           onChange={handleVariationChange}
           onAdd={addVariation}
           onRemove={removeVariation}
+          onRemoveImage={removeImage}
         />
       </Card>
       <Button type="submit" className="w-full">

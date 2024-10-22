@@ -16,6 +16,7 @@ interface VariationsProps {
   ) => void;
   onAdd: () => void;
   onRemove: (index: number) => void;
+  onRemoveImage: (varIdx: number, imgIdx: number) => void;
 }
 
 const Variations: React.FC<VariationsProps> = ({
@@ -23,6 +24,7 @@ const Variations: React.FC<VariationsProps> = ({
   onChange,
   onAdd,
   onRemove,
+  onRemoveImage,
 }) => {
   return (
     <>
@@ -38,6 +40,7 @@ const Variations: React.FC<VariationsProps> = ({
               variant={variation}
               varIdx={index}
               onChange={onChange}
+              onRemoveImage={onRemoveImage}
             />
             <div className="grid grid-cols-2 gap-4">
               <div>
