@@ -16,8 +16,6 @@ interface VariationsProps {
   ) => void;
   onAdd: () => void;
   onRemove: (index: number) => void;
-
-  
 }
 
 const Variations: React.FC<VariationsProps> = ({
@@ -33,15 +31,14 @@ const Variations: React.FC<VariationsProps> = ({
       </CardHeader>
       <CardContent>
         {variations.map((variation, index) => (
-          <div key={index} className="mb-4 p-4 border rounded">
-            <h2 className="text-xl font-semibold">Images</h2>
-
+          <div key={"variation-" + index} className="mb-4 p-4 border rounded">
+            <Label htmlFor={`image-${index}`}>images {index}</Label>
             <ImageUploader
-             variant={variation}
-              index={index}
+              key={"image-uploader-" + index}
+              variant={variation}
+              varIdx={index}
               onChange={onChange}
             />
-
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor={`sku-${index}`}>SKU</Label>

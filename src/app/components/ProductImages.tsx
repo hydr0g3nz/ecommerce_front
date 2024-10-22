@@ -2,44 +2,51 @@
 
 import Image from "next/image";
 import { useState } from "react";
-
-const images = [
-  { id: 1, url: "/JUMPMAN+FLIGHT+HBR+TEE.png" },
-  { id: 2, url: "/JUMPMAN+FLIGHT+HBR+TEE2.jpeg" },
-  { id: 3, url: "/JUMPMAN+FLIGHT+HBR+TEE3.jpeg" },
-  { id: 4, url: "/JUMPMAN+FLIGHT+HBR+TEE4.jpeg" },
-];
-
-const ProductImages = ({ items = images }: { items?: typeof images }) => {
+import { Product } from "@/types/product";
+interface ProductImagesProps {
+  images: string[];
+}
+const ProductImages: React.FC<ProductImagesProps> = ({ images }) => {
   const [index, setIndex] = useState(0);
-  items =  images;
+  const [selectedImg, setSelectedImg] = useState(0);
   return (
     <div className="flex grow gap-4">
       {/* Thumbnail images */}
-      <div className="w-3/12 gap-2 mt-8 flex flex-col">
-        {items.map((item, i) => (
+      <div className="w-3/12 gap-2 flex flex-col content-start">
+        {images?.map((url, i) => (
           <div
-            className=""
-            key={item.id}
-            onClick={() => setIndex(i)}
+            className="relative cursor-pointer"
+            key={i}
+            onClick={() => setSelectedImg(i)}
+            onMouseOver={() => setIndex(i)}
+            onMouseLeave={() => setIndex(-1)}
           >
-            <Image 
-              src={item.url} 
-              alt="" 
+            <Image
+              src={`http://127.0.0.1:8080/api/v1/images/products/${url}`}
+              alt=""
               width={0}
               height={0}
               sizes="100%"
               style={{ width: "100%", height: "auto" }}
               className="rounded-md"
             />
+            <div
+              className={`${
+                selectedImg === i ? "block" : "hidden"
+              } absolute top-0 left-0 w-full h-full bg-black opacity-40 rounded-md`}
+            />
           </div>
         ))}
       </div>
       {/* Main image */}
       <div className="">
-        <Image 
-          src={items[index].url} 
-          alt="" 
+        <Image
+          src={
+            index !== -1
+              ? `http://127.0.0.1:8080/api/v1/images/products/${images[index]}`
+              : `http://127.0.0.1:8080/api/v1/images/products/${images[selectedImg]}`
+          }
+          alt=""
           width={0}
           height={0}
           sizes="100%"
