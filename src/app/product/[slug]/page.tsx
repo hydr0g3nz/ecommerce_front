@@ -1,20 +1,32 @@
 "use client";
+
 import Add from "@/components/Add";
-import CustomizeProducts from "@/components/CustomizeProducts";
 import ProductImages from "@/components/ProductImages";
 import { notFound } from "next/navigation";
 import { Suspense, useEffect } from "react";
-import { Product, VariationImageBlob } from "@/types/product";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useProduct } from "@/hooks/useProduct";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 const ProductDetailPage: React.FC = () => {
   const [variantIndex, setVariantIndex] = useState<number>(0);
   const id = usePathname().split("/")[2];
   const { product, loading, error, updateProduct, getProduct } = useProduct();
   const [selectedSize, setSelectedSize] = useState("");
+  const colors = [
+    ...new Set(
+      product.variations.map((v) => {
+        return v.color;
+      })
+    ),
+  ];
+  const sizes = [
+    ...new Set(
+      product.variations.map((v) => {
+        return v.size;
+      })
+    ),
+  ];
   useEffect(() => {
     console.log("id", id);
     getProduct(id);
@@ -42,6 +54,8 @@ const ProductDetailPage: React.FC = () => {
       </div>
       {/* Details */}
       <div className="w-full lg:w-5/12 flex flex-col gap-6">
+        {JSON.stringify(colors)}
+        {JSON.stringify(sizes)}
         <h1 className="text-4xl font-medium">{product.name}</h1>
         <p className="text-gray-500">{product.description}</p>
         <div className="h-[2px] bg-gray-100" />
@@ -63,27 +77,30 @@ const ProductDetailPage: React.FC = () => {
         <div className="h-[2px] bg-gray-100" />
         {/* => Variant */}
         <div className="flex gap-4">
-          {product.variations?.map((v, i) => (
-            <div
-              className={
-                variantIndex === i
-                  ? "rounded-md relative cursor-pointer w-2/12 h-auto border border-black"
-                  : "rounded-md relative cursor-pointer w-2/12 h-auto hover:border-black hover:border"
-              }
-              key={i}
-              onClick={() => setVariantIndex(i)}
-            >
-              <Image
-                src={`http://127.0.0.1:8080/api/v1/images/products/${v.images?.[0]}`}
-                alt=""
-                width={0}
-                height={0}
-                sizes="100%"
-                style={{ width: "100%", height: "auto" }}
-                className="rounded-md"
-              />
-            </div>
-          ))}
+          {colors?.map((v, i) => {
+            let index = product.variations.findIndex((p) => p.color === v);
+            return (
+              <div
+                className={
+                  variantIndex === index
+                    ? "rounded-md relative cursor-pointer w-2/12 h-auto border border-black"
+                    : "rounded-md relative cursor-pointer w-2/12 h-auto hover:border-black hover:border"
+                }
+                key={i}
+                onClick={() => setVariantIndex(index)}
+              >
+                <Image
+                  src={`http://127.0.0.1:8080/api/v1/images/products/${product.variations?.[index]?.images?.[0]}`}
+                  alt=""
+                  width={0}
+                  height={0}
+                  sizes="100%"
+                  style={{ width: "100%", height: "auto" }}
+                  className="rounded-md"
+                />
+              </div>
+            );
+          })}
         </div>
         {/* => size */}
         <div className="flex items-center mb-2">
@@ -93,11 +110,24 @@ const ProductDetailPage: React.FC = () => {
           </span>
         </div>
         <div className="flex gap-2">
-          {product.variations?.map((v, i) => (
-            <button
-              key={v.size}
-              onClick={() => setSelectedSize(v.size)}
-              className={`
+          {product.variations
+            ?.filter((v) => v.color === product.variations[variantIndex].color)
+            .map((v, _) => {
+              const isAvailable = v.stock > 0;
+              return (
+                <button
+                  key={v.size}
+                  onClick={() => {
+                    setSelectedSize(v.size);
+                    setVariantIndex(
+                      product.variations.findIndex(
+                        (p) =>
+                          p.size === v.size &&
+                          p.color === product.variations[variantIndex].color
+                      )
+                    );
+                  }}
+                  className={`
                   h-10 w-10 flex items-center justify-center
                   border rounded
                   bg-white w-fit p-3 text-lg
@@ -106,26 +136,19 @@ const ProductDetailPage: React.FC = () => {
                       ? "border-black"
                       : "border-gray-300 hover:border-black"
                   }
+                  ${
+                    isAvailable
+                      ? "hover:border-blue-500"
+                      : "opacity-50 cursor-not-allowed"
+                  }
                 `}
-            >
-              {v.size}
-            </button>
-          ))}
+                >
+                  {v.size}
+                </button>
+              );
+            })}
         </div>
 
-        {/* {product.variants?.length && product.productOptions ? (
-          <CustomizeProducts
-            productId={product._id!}
-            variants={product.variants}
-            productOptions={product.productOptions}
-          />
-        ) : (
-          <Add
-            productId={product._id!}
-            variantId="00000000-0000-0000-0000-000000000000"
-            stockNumber={product.stock?.quantity || 0}
-          />
-        )} */}
         <div className="h-[2px] bg-gray-100" />
         {Object.entries(product.specifications).map(([key, value], index) => (
           <div className="text-sm" key={index}>
