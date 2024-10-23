@@ -46,6 +46,45 @@ export const useProductForm = (initialProduct: Product) => {
     }));
     return updatedProduct;
   };
+  const handleDeleteProduct = async () => {
+    try {
+      await Promise.all(
+        formData.variations.map((v) => {
+          try {
+            return Promise.all(v.images.map((i) => deleteProductImage(i)));
+          } catch (error) {
+            console.error("Error deleting images:", error);
+            if (error) {
+              const response = error as Response;
+              if (response.status >= 500) {
+                throw error;
+              }
+            }
+          }
+        })
+      );
+    } catch (error) {
+      console.error("Error deleting images:", error);
+      if (error) {
+        const response = error as Response;
+        if (response.status >= 500) {
+          throw error;
+        }
+      }
+    }
+
+    try {
+      await deleteProduct(formData.product_id);
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      if (error) {
+        const response = error as Response;
+        if (response.status >= 500) {
+          throw error;
+        }
+      }
+    }
+  };
   const uploadProductImage = async (image: Blob): Promise<string> => {
     const formData = new FormData();
     formData.append("image", image, "cropped_image.jpg");
@@ -130,6 +169,7 @@ export const useProductForm = (initialProduct: Product) => {
   };
 
   const removeVariation = (index: number) => {
+    setDeletedImages((prev) => [...prev, ...formData.variations[index].images]);
     setFormData((prev) => ({
       ...prev,
       variations: prev.variations.filter((_, i) => i !== index),
@@ -156,6 +196,17 @@ export const useProductForm = (initialProduct: Product) => {
       formData.variations[varIdx].images[imgIdx],
     ]);
   };
+  const deleteProduct = async (product_id: string) => {
+    const response = await fetch(
+      `http://127.0.0.1:8080/api/v1/product/` + product_id,
+      {
+        method: "DELETE",
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Failed to delete product");
+    }
+  };
   return {
     formData,
     handleInputChange,
@@ -168,5 +219,6 @@ export const useProductForm = (initialProduct: Product) => {
     removeImage,
     beforeUploadProduct,
     setFormData,
+    handleDeleteProduct,
   };
 };

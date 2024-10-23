@@ -6,7 +6,18 @@ import Specifications from "@/components/Specifications";
 import Variations from "@/components/Variations";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-
+import { useRouter } from 'next/navigation'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 interface ProductFormProps {
   product: Product;
   onSubmit: (product: Product) => void;
@@ -29,9 +40,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
     removeSpecification,
     beforeUploadProduct,
     removeImage,
-    setFormData,
+    handleDeleteProduct,
   } = useProductForm(product);
-
+const [open, setOpen] = React.useState(false);
+const router = useRouter()
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("before", formData);
@@ -40,7 +52,11 @@ const ProductForm: React.FC<ProductFormProps> = ({
     onSubmit(updatedProduct);
     // setFormData((prev) => ({ ...prev, ...updatedProduct }));
   };
-
+  const handleDelete = () => {
+    setOpen(false);
+    handleDeleteProduct();
+    router.push('/list')
+  };
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <Card>
@@ -63,9 +79,38 @@ const ProductForm: React.FC<ProductFormProps> = ({
           onRemoveImage={removeImage}
         />
       </Card>
-      <Button type="submit" className="w-full">
-        {mode === "add" ? "Create Product" : "Update Product"}
-      </Button>
+      <div className="flex gap-4">
+        <Button type="submit" className="w-1/2">
+          {mode === "add" ? "Create Product" : "Update Product"}
+        </Button>
+        <Button
+              type="button"
+              onClick={() =>
+                setOpen(true)
+              }
+              className="w-1/2 bg-red-500 hover:bg-red-600"
+            >
+              Delete Product
+            </Button>
+        <AlertDialog open={open}>
+          {/* <AlertDialogTrigger asChild>
+           
+          </AlertDialogTrigger> */}
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete your
+                account and remove your data from our servers.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setOpen(false)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600">Continue</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </form>
   );
 };
