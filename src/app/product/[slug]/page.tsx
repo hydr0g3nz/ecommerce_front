@@ -7,7 +7,14 @@ import Image from "next/image";
 import { useProduct } from "@/hooks/useProduct";
 import ProductImages from "@/components/ProductImages";
 import Add from "@/components/Add";
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { MoreVertical, PenLine } from "lucide-react";
 // Types
 type Variant = {
   color: string;
@@ -178,7 +185,23 @@ const ProductDetailPage: React.FC = () => {
       </div>
 
       <div className="w-full lg:w-5/12 flex flex-col gap-6">
-        <h1 className="text-4xl font-medium">{product.name}</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-4xl font-medium">{product.name}</h1>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" disabled={false}>
+                <MoreVertical className="h-4 w-4" />
+                <span className="sr-only">More</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem className="flex justify-between">
+                Edit
+                <PenLine />
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         <p className="text-gray-500">{product.description}</p>
 
         <Divider />

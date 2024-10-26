@@ -36,6 +36,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const [crop, setCrop] = useState<Crop>();
   const imageRef = useRef<HTMLImageElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize images and blobs in useEffect
   useEffect(() => {
@@ -48,6 +49,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   }, [varIdx, variant, onChange]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -56,6 +59,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         setCropDialogOpen(true);
       };
       reader.readAsDataURL(file);
+    }
+    // Reset the file input value
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -68,8 +75,18 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       onChange(varIdx, "blobs", newBlobs);
       setCropDialogOpen(false);
       setSelectedImage(null);
+      setCrop(undefined);
     } catch (error) {
       console.error("Error cropping image:", error);
+    }
+  };
+
+  const handleDialogClose = () => {
+    setCropDialogOpen(false);
+    setSelectedImage(null);
+    setCrop(undefined);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -172,6 +189,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             accept="image/*"
             className="hidden"
             onChange={handleImageUpload}
+            ref={fileInputRef}
           />
           <div className="flex items-center gap-2 text-blue-500">
             <Upload className="h-4 w-4" />
@@ -180,7 +198,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         </label>
       </div>
 
-      <Dialog open={cropDialogOpen} onOpenChange={setCropDialogOpen}>
+      <Dialog open={cropDialogOpen} onOpenChange={handleDialogClose}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Crop Image for Variation {varIdx}</DialogTitle>

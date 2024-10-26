@@ -6,7 +6,7 @@ import Specifications from "@/components/Specifications";
 import Variations from "@/components/Variations";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,8 +16,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+
 interface ProductFormProps {
   product: Product;
   onSubmit: (product: Product) => void;
@@ -42,23 +42,26 @@ const ProductForm: React.FC<ProductFormProps> = ({
     removeImage,
     handleDeleteProduct,
   } = useProductForm(product);
-const [open, setOpen] = React.useState(false);
-const router = useRouter()
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [updateDialogOpen, setUpdateDialogOpen] = React.useState(false);
+  const router = useRouter();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("before", formData);
     let updatedProduct = await beforeUploadProduct();
-    console.log("after", updatedProduct);
     onSubmit(updatedProduct);
-    // setFormData((prev) => ({ ...prev, ...updatedProduct }));
+    router.push('/list');
   };
+
   const handleDelete = () => {
-    setOpen(false);
+    setDeleteDialogOpen(false);
     handleDeleteProduct();
-    router.push('/list')
+    router.push('/list');
   };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form  className="space-y-6">
       <Card>
         <BasicInfo product={formData} onChange={handleInputChange} />
       </Card>
@@ -80,37 +83,61 @@ const router = useRouter()
         />
       </Card>
       <div className="flex gap-4">
-        <Button type="submit" className="w-1/2">
+        <Button  type="button" onClick={() => setUpdateDialogOpen(true)} className="w-1/2">
           {mode === "add" ? "Create Product" : "Update Product"}
         </Button>
         <Button
-              type="button"
-              onClick={() =>
-                setOpen(true)
-              }
-              className="w-1/2 bg-red-500 hover:bg-red-600"
-            >
-              Delete Product
-            </Button>
-        <AlertDialog open={open}>
-          {/* <AlertDialogTrigger asChild>
-           
-          </AlertDialogTrigger> */}
+          type="button"
+          onClick={() => setDeleteDialogOpen(true)}
+          className="w-1/2 bg-red-500 hover:bg-red-600"
+        >
+          Delete Product
+        </Button>
+    </div>
+        {/* Update Confirmation Dialog */}
+        <AlertDialog open={updateDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm {mode === "add" ? "Creation" : "Update"}</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to {mode === "add" ? "create" : "update"} this product? 
+                Please review all information before confirming.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setUpdateDialogOpen(false)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction 
+              onClick={handleSubmit}
+               type="submit"
+               >
+                Confirm
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
               <AlertDialogDescription>
                 This action cannot be undone. This will permanently delete your
-                account and remove your data from our servers.
+                product and remove all associated data from our servers.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setOpen(false)}>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600">Continue</AlertDialogAction>
+              <AlertDialogCancel onClick={() => setDeleteDialogOpen(false)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600">
+                Delete
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      </div>
     </form>
   );
 };
