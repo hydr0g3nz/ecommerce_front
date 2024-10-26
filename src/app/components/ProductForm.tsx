@@ -22,12 +22,14 @@ interface ProductFormProps {
   product: Product;
   onSubmit: (product: Product) => void;
   mode: string;
+  handleModalClose: () => void;
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({
   product,
   onSubmit,
   mode,
+  handleModalClose,
 }) => {
   const {
     formData,
@@ -51,13 +53,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
     e.preventDefault();
     let updatedProduct = await beforeUploadProduct();
     onSubmit(updatedProduct);
-    router.push('/list');
+    handleModalClose()
   };
 
   const handleDelete = () => {
     setDeleteDialogOpen(false);
     handleDeleteProduct();
-    router.push('/list');
+    handleModalClose();
   };
 
   return (

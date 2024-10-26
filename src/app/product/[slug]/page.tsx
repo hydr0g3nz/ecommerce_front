@@ -15,6 +15,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreVertical, PenLine } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+
+import Link from "next/link";
 // Types
 type Variant = {
   color: string;
@@ -160,7 +164,6 @@ const ProductDetailPage: React.FC = () => {
 
   const colors = [...new Set(product.variations?.map((v) => v.color))];
   const sizes = [...new Set(product.variations?.map((v) => v.size))];
-
   useEffect(() => {
     getProduct(id);
     setVariantIndex(product.variations ? 0 : -1);
@@ -195,10 +198,12 @@ const ProductDetailPage: React.FC = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem className="flex justify-between">
-                Edit
-                <PenLine />
-              </DropdownMenuItem>
+              <Link href={`/product/${product.product_id}/edit`}>
+                <DropdownMenuItem className="flex justify-between">
+                  Edit
+                  <PenLine />
+                </DropdownMenuItem>
+              </Link>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
