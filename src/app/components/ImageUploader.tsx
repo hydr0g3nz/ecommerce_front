@@ -193,26 +193,27 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           />
           <div className="flex items-center gap-2 text-blue-500">
             <Upload className="h-4 w-4" />
-            <span>Upload Image for Variation {varIdx}</span>
+            <span>Upload Image for Variation</span>
           </div>
         </label>
       </div>
 
       <Dialog open={cropDialogOpen} onOpenChange={handleDialogClose}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Crop Image for Variation {varIdx}</DialogTitle>
+        <DialogContent style={{ maxWidth: "50vw", height: "80vh" } }>
+          <DialogHeader className="h-min-con">
+            <DialogTitle>Crop Image for Variation</DialogTitle>
             <DialogDescription>
               Adjust the crop area to select the portion of the image you want
               to use
             </DialogDescription>
           </DialogHeader>
           {selectedImage && (
-            <div className="space-y-4">
+            <div className="mb-4">
               <ReactCrop
                 crop={crop}
                 onChange={(c) => setCrop(c)}
                 aspect={4 / 5}
+                className="w-full h-auto"
               >
                 <Image
                   src={selectedImage}
@@ -221,13 +222,13 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                   width={0}
                   height={0}
                   sizes="100vw"
-                  style={{ width: "100%", height: "auto", maxHeight: "70vh" }}
+                  style={{ width: "100%", height: "auto",  }}
                 />
               </ReactCrop>
               <Button
                 onClick={handleCropComplete}
                 disabled={!crop}
-                className="w-full"
+                className="w-min-content " 
               >
                 Confirm Crop
               </Button>

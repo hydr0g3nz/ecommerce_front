@@ -24,8 +24,8 @@ const EditProduct: React.FC<EditProductProps> = (
     return <div className="text-center mt-8 text-red-500">{error}</div>;
 
   return (
-    <div className="max-w-4xl mx-auto mt-8 p-4 space-y-6">
-      <h1 className="text-3xl font-bold mb-6">Edit Product</h1>
+    <div >
+    {/* <div className="max-w-4xl mx-auto mt-8 p-4 space-y-6"> */}
       <ProductForm product={product} onSubmit={updateProduct} mode="update" handleModalClose={handleModalClose} />
     </div>
   );

@@ -17,24 +17,9 @@ import { Button } from "@/components/ui/button";
 import { MoreVertical, PenLine } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-
+import { Product, Variation } from "@/types/product";
 import Link from "next/link";
 // Types
-type Variant = {
-  color: string;
-  size: string;
-  price: number;
-  stock: number;
-  images: string[];
-};
-
-type Product = {
-  _id?: string;
-  name: string;
-  description: string;
-  variations: Variant[];
-  specifications: Record<string, string>;
-};
 
 // Helper Components
 const ColorSelector = ({
@@ -89,8 +74,8 @@ const SizeSelector = ({
 }) => (
   <>
     <div className="flex items-center mb-2">
-      <span className="text-sm text-gray-700">เลือกไซส์</span>
-      <span className="text-sm text-gray-500 ml-2">คำแนะนำในการเลือกไซส์</span>
+      <span className="text-lg font-bold text-black">เลือกไซส์</span>
+      {/* <span className="text-sm text-gray-500 ml-2">คำแนะนำในการเลือกไซส์</span> */}
     </div>
     <div className="flex gap-2">
       {product.variations
@@ -132,25 +117,37 @@ const SizeSelector = ({
   </>
 );
 
-const PriceDisplay = ({ variant }: { variant: Variant }) =>
-  variant.price === variant.price ? (
-    <h2 className="font-medium text-2xl">${variant.price}</h2>
+const PriceDisplay = ({ variant }: { variant: Variation }) => {
+  const isSale = variant.sale != 0;
+  const price = Math.floor(variant.price - variant.price * (variant.sale / 100));
+  const percent = Math.floor(variant.sale); // Since variant.sale is already a percentage
+  
+  return !isSale ? (
+    <h2 className="font-medium text-2xl">฿{Math.floor(variant.price)}</h2>
   ) : (
     <div className="flex items-center gap-4">
-      <h3 className="text-xl text-gray-500 line-through">${variant.price}</h3>
-      <h2 className="font-medium text-2xl">${variant.price}</h2>
+      <h2 className="text-lg font-bold">฿{price}</h2>
+      <h3 className="text-lg text-gray-500 line-through">฿{Math.floor(variant.price)}</h3>
+      <h3 className="text-lg text-green-800 font-bold">
+        ส่วนลด {percent}%
+      </h3>
     </div>
   );
+};
 
-const Specifications = ({ specs }: { specs: Record<string, string> }) => (
-  <>
+const Specifications = ({ description,specs }: {description: string, specs: Record<string, string> }) => (
+  <div className="space-y-2">
+    <h2 className="text-sm">{description}</h2>
     {Object.entries(specs).map(([key, value], index) => (
-      <div className="text-sm" key={index}>
-        <h4 className="font-medium mb-4">{key}</h4>
-        <p>{value}</p>
+      <div className="flex items-start gap-2" key={index}>
+        <span className="text-lg leading-7">•</span>
+        <div className="text-sm">
+          <span className="font-medium">{key}: </span>
+          <span>{value}</span>
+        </div>
       </div>
     ))}
-  </>
+  </div>
 );
 
 const Divider = () => <div className="h-[2px] bg-gray-100" />;
@@ -189,7 +186,7 @@ const ProductDetailPage: React.FC = () => {
 
       <div className="w-full lg:w-5/12 flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-4xl font-medium">{product.name}</h1>
+          <h1 className="text-2xl font-bold ">{product.name}</h1>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" disabled={false}>
@@ -207,7 +204,7 @@ const ProductDetailPage: React.FC = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <p className="text-gray-500">{product.description}</p>
+        <p className="text-gray-500">{product.category}</p>
 
         <Divider />
         <PriceDisplay variant={currentVariant} />
@@ -228,7 +225,7 @@ const ProductDetailPage: React.FC = () => {
         />
 
         <Divider />
-        <Specifications specs={product.specifications} />
+        <Specifications description={product.description} specs={product.specifications} />
         <Divider />
 
         <h1 className="text-2xl">User Reviews</h1>

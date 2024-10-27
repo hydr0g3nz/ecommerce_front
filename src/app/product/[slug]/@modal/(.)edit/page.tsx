@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { usePathname,useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Product } from "@/types/product";
 import { useProduct } from "@/hooks/useProduct";
 import ProductForm from "@/components/ProductForm";
@@ -29,20 +29,24 @@ const EditProductModal: React.FC = () => {
   const pathname = usePathname();
   const id = pathname?.split("/")[2];
   useEffect(() => {
-    console.log("edit product modal",id);
-  },[])
+    console.log("edit product modal", id);
+  }, []);
   const onClose = () => {
     setEditDialog(!editDialog);
     router.back();
     // router.refresh();
- }
+  };
   return (
     <Dialog open={editDialog} onOpenChange={onClose}>
       <DialogTrigger />
-      <DialogContent className=" w-[90%]">
-        <DialogClose/>
-        <ScrollArea className="h-[calc(100vh-80px)]">
-          <EditProduct  handleModalClose={onClose}/>
+      <DialogContent style={{maxWidth: "70vw"}}>
+        <DialogHeader>
+          <DialogTitle className="text-center text-3xl">Edit Product</DialogTitle>
+        </DialogHeader>
+        <ScrollArea style={{ height: "80vh" }}>
+          <div className="m-4">
+            <EditProduct handleModalClose={onClose} />
+          </div>
         </ScrollArea>
       </DialogContent>
     </Dialog>
