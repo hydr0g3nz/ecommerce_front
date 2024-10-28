@@ -15,7 +15,7 @@ const EditProduct: React.FC<EditProductProps> = (
   { handleModalClose }
 ) => {
   const id = usePathname().split("/")[2];
-  const { product, loading, error, updateProduct, getProduct } = useProduct();
+  const { product, category,loading, error, updateProduct, getProduct } = useProduct();
   useEffect(() => {
     getProduct(id);
   }, []);
@@ -26,7 +26,7 @@ const EditProduct: React.FC<EditProductProps> = (
   return (
     <div >
     {/* <div className="max-w-4xl mx-auto mt-8 p-4 space-y-6"> */}
-      <ProductForm product={product} onSubmit={updateProduct} mode="update" handleModalClose={handleModalClose} />
+      <ProductForm product={product} categories={category} onSubmit={updateProduct} mode="update" handleModalClose={handleModalClose} />
     </div>
   );
 };

@@ -17,9 +17,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
+import { Category } from "@/types/category";
 interface ProductFormProps {
   product: Product;
+  categories: Category[];
   onSubmit: (product: Product) => void;
   mode: string;
   handleModalClose: () => void;
@@ -27,6 +28,7 @@ interface ProductFormProps {
 
 const ProductForm: React.FC<ProductFormProps> = ({
   product,
+  categories,
   onSubmit,
   mode,
   handleModalClose,
@@ -65,7 +67,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   return (
     <form  className="space-y-6">
       <Card>
-        <BasicInfo product={formData} onChange={handleInputChange} />
+        <BasicInfo product={formData} categories={categories} onChange={handleInputChange} />
       </Card>
       <Card>
         <Specifications

@@ -139,10 +139,10 @@ const Specifications = ({ description,specs }: {description: string, specs: Reco
   <div className="space-y-2">
     <h2 className="text-sm">{description}</h2>
     {Object.entries(specs).map(([key, value], index) => (
-      <div className="flex items-start gap-2" key={index}>
+      <div className="flex items-center gap-2" key={index}>
         <span className="text-lg leading-7">•</span>
         <div className="text-sm">
-          <span className="font-medium">{key}: </span>
+          <span className="font-medium">{key} : </span>
           <span>{value}</span>
         </div>
       </div>

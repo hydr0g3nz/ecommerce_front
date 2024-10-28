@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Product, Variation, VariationImageBlob } from "@/types/product";
-
+import { Category } from "@/types/category";
 export const useProductForm = (initialProduct: Product) => {
   const [formData, setFormData] = useState<Product>(initialProduct);
   const [deletedImages, setDeletedImages] = useState<string[]>([]);
@@ -125,11 +125,16 @@ export const useProductForm = (initialProduct: Product) => {
       throw error;
     }
   };
+  type  x ={
+    name: string;
+    value: string;
+  }
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement  >
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    console.log(name, value);
   };
 
   const handleSpecificationChange = (key: string, value: string) => {
@@ -207,6 +212,7 @@ export const useProductForm = (initialProduct: Product) => {
       throw new Error("Failed to delete product");
     }
   };
+
   return {
     formData,
     handleInputChange,

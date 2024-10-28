@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Product, Variation, VariationImageBlob } from "@/types/product";
-
+import { Category } from "@/types/category";
 export const useProduct = () => {
   const [product, setProduct] = useState<Product>({
     product_id: "",
@@ -15,10 +15,11 @@ export const useProduct = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [category, setCategory] = useState<Category[]>([]);
   const getProduct = async (id: string) => {
     console.log(product);
     fetchProductApi(id);
+    fetchCategoryApi()
   };
 
   const fetchProductApi = async (productId: string) => {
@@ -35,6 +36,25 @@ export const useProduct = () => {
     } catch (error) {
       console.error("Error fetching product:", error);
       setError("Failed to load product. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const fetchCategoryApi = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://127.0.0.1:8080/api/v1/category`, {
+        method: "GET",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch category");
+      }
+      const data = await response.json();
+      setCategory(data);
+      console.log(data);
+    } catch (error) {
+      console.error("Error fetching category:", error);
+      setError("Failed to load category. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -88,8 +108,10 @@ export const useProduct = () => {
       throw new Error("Failed to update product");
     }
   };
+
   return {
     product,
+    category,
     loading,
     error,
     setProduct,
