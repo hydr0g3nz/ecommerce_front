@@ -1,10 +1,10 @@
-'use client';
-import { useState, useEffect } from 'react';
+"use client";
+import { useState, useEffect } from "react";
 import Filter from "@/components/Filter";
 import ProductList from "@/components/ProductList";
 import Image from "next/image";
 
-const ListPage = ({ searchParams }:{searchParams: any}) => {
+const ListPage = ({ searchParams }: { searchParams: any }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,16 +12,19 @@ const ListPage = ({ searchParams }:{searchParams: any}) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8080/api/v1/product/", {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          // body: JSON.stringify({
-          //   product_id: "01923cde-d281-77ac-bc1c-40edc804179c",
-          //   name: "Ball"
-          // })
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            // body: JSON.stringify({
+            //   product_id: "01923cde-d281-77ac-bc1c-40edc804179c",
+            //   name: "Ball"
+            // })
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

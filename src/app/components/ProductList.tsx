@@ -69,10 +69,7 @@ const ProductList = ({ products }: { products: Product[] | null }) => {
           <div className="relative w-full h-80">
             {product.variations?.[0].images?.[0] && (
               <Image
-                src={
-                  "http://127.0.0.1:8080/api/v1/images/products/" +
-                  product.variations?.[0].images?.[0]
-                }
+                src={`${process.env.NEXT_PUBLIC_API_URL}/api/v1/images/products/${product.variations?.[0].images?.[0]}`}
                 alt={product.name}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
@@ -89,8 +86,7 @@ const ProductList = ({ products }: { products: Product[] | null }) => {
               : false) && (
               <Image
                 src={
-                  "http://127.0.0.1:8080/api/v1/images/products/" +
-                  product.variations?.[0].images?.[1]
+`                  ${process.env.NEXT_PUBLIC_API_URL}/api/v1/images/products/${product.variations?.[0].images?.[1]}`
                 }
                 alt={product.name}
                 fill

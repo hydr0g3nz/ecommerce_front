@@ -91,7 +91,7 @@ export const useProductForm = (initialProduct: Product) => {
 
     try {
       const response = await fetch(
-        "http://127.0.0.1:8080/api/v1/product/image",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/image`,
         {
           method: "POST",
           body: formData,
@@ -110,7 +110,7 @@ export const useProductForm = (initialProduct: Product) => {
   const deleteProductImage = async (filename: string): Promise<string> => {
     try {
       const response = await fetch(
-        "http://127.0.0.1:8080/api/v1/product/image/" + filename,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/image/${filename}`,
         {
           method: "DELETE",
         }
@@ -203,7 +203,7 @@ export const useProductForm = (initialProduct: Product) => {
   };
   const deleteProduct = async (product_id: string) => {
     const response = await fetch(
-      `http://127.0.0.1:8080/api/v1/product/` + product_id,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/${ product_id}` ,
       {
         method: "DELETE",
       }

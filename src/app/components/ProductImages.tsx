@@ -9,6 +9,7 @@ interface ProductImagesProps {
 const ProductImages: React.FC<ProductImagesProps> = ({ images }) => {
   const [index, setIndex] = useState(0);
   const [selectedImg, setSelectedImg] = useState(0);
+  if (!images) return null;
   return (
     <div className="flex grow gap-4  justify-end">
       {/* Thumbnail images */}
@@ -22,7 +23,7 @@ const ProductImages: React.FC<ProductImagesProps> = ({ images }) => {
             onMouseLeave={() => setIndex(-1)}
           >
             <Image
-              src={`http://127.0.0.1:8080/api/v1/images/products/${url}`}
+              src={`${process.env.NEXT_PUBLIC_API_URL}/api/v1/images/products/${url}`}
               alt=""
               width={0}
               height={0}
@@ -43,8 +44,8 @@ const ProductImages: React.FC<ProductImagesProps> = ({ images }) => {
         <Image
           src={
             index !== -1
-              ? `http://127.0.0.1:8080/api/v1/images/products/${images[index]}`
-              : `http://127.0.0.1:8080/api/v1/images/products/${images[selectedImg]}`
+              ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/images/products/${images[index]}`
+              : `${process.env.NEXT_PUBLIC_API_URL}/api/v1/images/products/${images[selectedImg]}`
           }
           alt=""
           width={0}

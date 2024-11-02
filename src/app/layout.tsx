@@ -5,6 +5,7 @@ import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
 import { Provider } from "react-redux";
 import StoreProvider from "./StoreProvider";
+import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ export default function RootLayout({
           {children}
           <Footer />
         </StoreProvider>
+        <Toaster />
       </body>
     </html>
   );

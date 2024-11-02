@@ -23,14 +23,23 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAuth } from "@/hooks/useAuth";
 const EditProductModal: React.FC = () => {
   const [editDialog, setEditDialog] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
   const id = pathname?.split("/")[2];
+  const { role, authloading } = useAuth();
   useEffect(() => {
-    console.log("edit product modal", id);
-  }, []);
+    if (!authloading) {
+      if (!role) {
+        router.replace('/login');
+      }
+    }
+  }, [role, authloading]);
+  if (authloading) {
+    return <div>Loading...</div>; // You can replace this with a proper loading component
+  }
   const onClose = () => {
     setEditDialog(!editDialog);
     router.back();

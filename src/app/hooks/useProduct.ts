@@ -26,7 +26,7 @@ export const useProduct = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://127.0.0.1:8080/api/v1/product/${productId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/${productId}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch product");
@@ -43,7 +43,7 @@ export const useProduct = () => {
   const fetchCategoryApi = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://127.0.0.1:8080/api/v1/category`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/category`, {
         method: "GET",
       });
       if (!response.ok) {
@@ -73,7 +73,7 @@ export const useProduct = () => {
   };
 
   const createProductApi = async (newProduct: Product) => {
-    const response = await fetch(`http://127.0.0.1:8080/api/v1/product`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/product`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newProduct),
@@ -99,7 +99,7 @@ export const useProduct = () => {
 
   const updateProductApi = async (updatedProduct: Product) => {
     console.log("updatedProduct", updatedProduct);
-    const response = await fetch(`http://127.0.0.1:8080/api/v1/product/`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updatedProduct),

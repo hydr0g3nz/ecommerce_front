@@ -143,7 +143,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         {variant.images?.map((image, imgIdx) => (
           <div key={`image-${varIdx}-${imgIdx}`} className="relative">
             <NextImage
-              src={`http://127.0.0.1:8080/api/v1/images/products/${image}`}
+              src={`${process.env.NEXT_PUBLIC_API_URL}/api/v1/images/products/${image}`}
               alt={`Product image ${imgIdx + 1}`}
               width={200}
               height={250}
