@@ -8,7 +8,8 @@ import { useEffect } from "react";
 import { RootState } from "../../store/cartStore";
 import { imageConfigDefault } from "next/dist/shared/lib/image-config";
 import { Separator } from "@/components/ui/separator";
-
+import { Button } from "./ui/button";
+import Link from "next/link";
 interface ChildComponentProps {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -89,7 +90,10 @@ const CartModal: React.FC<ChildComponentProps> = ({ isOpen, setIsOpen }) => {
                               className="text-blue-500"
                               style={{ cursor: "pointer" }}
                               onClick={() =>
-                                handleRemove(item.product_id, item.variations.sku)
+                                handleRemove(
+                                  item.product_id,
+                                  item.variations.sku
+                                )
                               }
                             >
                               Remove
@@ -110,12 +114,14 @@ const CartModal: React.FC<ChildComponentProps> = ({ isOpen, setIsOpen }) => {
                     Shipping and taxes calculated at checkout.
                   </p>
                   <div className="flex justify-between text-sm">
-                    <button className="rounded-md py-3 px-4 ring-1 ring-gray-300">
+                    {/* <Button className="rounded-md py-3 px-4 ring-1 ring-gray-300" >
                       View Cart
-                    </button>
-                    <button className="rounded-md py-3 px-4 bg-black text-white disabled:cursor-not-allowed disabled:opacity-75">
-                      Checkout
-                    </button>
+                    </Button> */}
+                    <Link href="/cart">
+                      <Button  className="rounded-md py-3 px-4">
+                        Checkout
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </>
