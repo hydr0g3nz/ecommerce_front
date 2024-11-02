@@ -243,7 +243,7 @@ const ProductDetailPage: React.FC = () => {
           selectedSize={selectedSize}
           onSizeSelect={handleSizeSelect}
         />
-        <Add variant={currentVariant} ></Add>
+        <Add name={product.name} variant={currentVariant} image={selectDisplayImages()[0]} ></Add>
         <Divider />
         <Specifications
           description={product.description}

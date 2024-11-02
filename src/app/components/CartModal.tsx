@@ -23,8 +23,8 @@ const CartModal: React.FC<ChildComponentProps> = ({ isOpen, setIsOpen }) => {
   const cart = useAppSelector((state: RootState) => state.cart);
   const dispatch = useAppDispatch();
 
-  const handleRemove = (id: string) => {
-    dispatch(removeItem(id));
+  const handleRemove = (id: string, sku: string) => {
+    dispatch(removeItem({ product_id: id, sku: sku }));
   };
 
   return (
@@ -37,7 +37,7 @@ const CartModal: React.FC<ChildComponentProps> = ({ isOpen, setIsOpen }) => {
           sideOffset={20}
         >
           <div className="">
-            {!cart.lineItems.length ? (
+            {!cart.items.length ? (
               <>
                 <div className="">Cart is Empty</div>
               </>
@@ -45,42 +45,44 @@ const CartModal: React.FC<ChildComponentProps> = ({ isOpen, setIsOpen }) => {
               <>
                 <h2 className="text-xl">Shopping Cart</h2>
                 <div className="flex flex-col gap-8 my-2">
-                  {cart.lineItems.map((item) => (
+                  {cart.items.map((item) => (
                     <>
-                      <div className="flex gap-4" key={item._id}>
+                      <div className="flex gap-4" key={item.product_id}>
                         {item.image && (
-                          <Image
-                            src={item.image}
-                            alt=""
-                            width={72}
-                            height={96}
-                            className="object-cover rounded-md"
-                          />
+                          <div className="w-24 h-24">
+                            <Image
+                              src={`${process.env.NEXT_PUBLIC_API_URL}/api/v1/images/products/${item.image}`}
+                              alt=""
+                              width={0}
+                              height={0}
+                              sizes="100%"
+                              className="rounded-md"
+                              quality={100}
+                              style={{ width: "100%", height: "auto" }}
+                            />
+                          </div>
                         )}
                         <div className="flex flex-col justify-between w-full">
                           <div className="">
                             <div className="flex items-center justify-between gap-8">
                               <h3 className="font-semibold">{item.name}</h3>
-                              <div className="p-1 bg-gray-50 rounded-sm flex items-center gap-2">
-                                {item.quantity > 1 && (
-                                  <div className="text-xs text-green-500">
-                                    {item.quantity} x{" "}
-                                  </div>
-                                )}
-                              </div>
                             </div>
-                            <div className="text-sm text-gray-500">
-                              available
-                            </div>
+                            {/* <div className="text-sm text-gray-500">
+                              {item.price}
+                            </div> */}
                           </div>
                           <div className="flex justify-between text-sm">
-                            <span className="text-gray-500">
-                              Qty {item.quantity}
-                            </span>
+                            <div className="p-1 bg-gray-50 rounded-sm flex items-center gap-2">
+                              <div className="text-xs text-green-500">
+                                {item.quantity} x{" "}
+                              </div>
+                            </div>
                             <span
                               className="text-blue-500"
                               style={{ cursor: "pointer" }}
-                              onClick={() => handleRemove(item._id)}
+                              onClick={() =>
+                                handleRemove(item.product_id, item.sku)
+                              }
                             >
                               Remove
                             </span>

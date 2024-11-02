@@ -5,11 +5,11 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { useState } from "react";
 import { Variation } from "@/types/product";
 import { useToast } from "@/hooks/use-toast";
-const Add = ({ variant }: { variant: Variation }) => {
+const Add = ({name, variant,image }: { name: string,variant: Variation ,image:string}) => {
   const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   var dispatch = useAppDispatch();
-  var cartItems = useAppSelector((state) => state.cart.lineItems);
+  var cartItems = useAppSelector((state) => state.cart.items);
   const { toast } = useToast();
   if (!variant) {
     return <></>;
@@ -27,11 +27,12 @@ const Add = ({ variant }: { variant: Variation }) => {
   };
   const handleAddItem = (id: string, quantity: number) => {
     const newItem: CartItem = {
-      _id: id,
-      name: "Item Name",
-      image:
-        "https://static.nike.com/a/images/c_limit,w_592,f_auto/t_product_v1/ddceaccc-4f2e-4cbd-84fc-b9053cb26c3f/%E0%B9%80%E0%B8%AA%E0%B8%B7%E0%B9%89%E0%B8%AD%E0%B9%81%E0%B8%88%E0%B9%87%E0%B8%84%E0%B9%80%E0%B8%81%E0%B9%87%E0%B8%95%E0%B8%9A%E0%B8%B2%E0%B8%AA%E0%B9%80%E0%B8%81%E0%B9%87%E0%B8%95%E0%B8%9A%E0%B8%AD%E0%B8%A5%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B8%97%E0%B8%AD%E0%B8%9C%E0%B8%B9%E0%B9%89-icon-8CZGX4.png",
-      quantity,
+      product_id: id,
+      sku: variant.sku,
+      quantity: quantity,
+      price: variant.price,
+      name: name,
+      image: image,
     };
     console.log(newItem);
     dispatch(addItem(newItem));
