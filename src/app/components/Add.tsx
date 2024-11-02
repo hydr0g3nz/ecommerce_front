@@ -3,15 +3,14 @@
 import { addItem, CartItem } from "@/features/cart/cartSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { useState } from "react";
-import { Variation } from "@/types/product";
 import { useToast } from "@/hooks/use-toast";
-const Add = ({name, variant,image }: { name: string,variant: Variation ,image:string}) => {
+const Add = ({ cartItem }: { cartItem: CartItem }) => {
   const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   var dispatch = useAppDispatch();
   var cartItems = useAppSelector((state) => state.cart.items);
   const { toast } = useToast();
-  if (!variant) {
+  if (!cartItem) {
     return <></>;
   }
   // // TEMPORARY
@@ -21,21 +20,13 @@ const Add = ({name, variant,image }: { name: string,variant: Variation ,image:st
     if (type === "d" && quantity > 1) {
       setQuantity((prev) => prev - 1);
     }
-    if (type === "i" && quantity < variant.stock) {
+    if (type === "i" && quantity < cartItem.variations.stock) {
       setQuantity((prev) => prev + 1);
     }
   };
-  const handleAddItem = (id: string, quantity: number) => {
-    const newItem: CartItem = {
-      product_id: id,
-      sku: variant.sku,
-      quantity: quantity,
-      price: variant.price,
-      name: name,
-      image: image,
-    };
-    console.log(newItem);
-    dispatch(addItem(newItem));
+  const handleAddItem = () => {
+    console.log(cartItem);
+    dispatch(addItem(cartItem));
     toast({
       title: "Item added to cart",
       description: "We've added the item to your cart.",
@@ -67,24 +58,26 @@ const Add = ({name, variant,image }: { name: string,variant: Variation ,image:st
             <button
               className="cursor-pointer text-xl disabled:cursor-not-allowed disabled:opacity-20"
               onClick={() => handleQuantity("i")}
-              disabled={quantity === variant.stock}
+              disabled={quantity === cartItem.variations.stock}
             >
               +
             </button>
           </div>
-          {variant.stock < 1 ? (
+          {cartItem.variations.stock < 1 ? (
             <div className="text-xs">Product is out of stock</div>
           ) : (
             <div className="text-xs">
               Only{" "}
-              <span className="text-orange-500">{variant.stock} items</span>{" "}
+              <span className="text-orange-500">
+                {cartItem.variations.stock} items
+              </span>{" "}
               left!
               <br /> {"Don't"} miss it
             </div>
           )}
         </div>
         <button
-          onClick={() => handleAddItem("1", 1)}
+          onClick={() => handleAddItem()}
           disabled={isLoading}
           className="w-36 text-sm rounded-3xl ring-1 ring-primary text-primary py-2 px-4 hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:bg-green-200 disabled:ring-0 disabled:text-white disabled:ring-none"
         >

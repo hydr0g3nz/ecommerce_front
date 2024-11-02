@@ -120,8 +120,8 @@ const SizeSelector = ({
 );
 
 const PriceDisplay = ({ variant }: { variant: Variation }) => {
-  if(!variant.sale){
-    variant.sale = 0
+  if (!variant.sale) {
+    variant.sale = 0;
   }
   const isSale = variant.sale != 0;
   const price = Math.floor(
@@ -171,6 +171,7 @@ const ProductDetailPage: React.FC = () => {
   const id = usePathname().split("/")[2];
   const { product, loading, error, getProduct } = useProduct();
   const { role, authloading } = useAuth();
+  const currentVariant = product.variations?.[variantIndex];
 
   const colors = [...new Set(product.variations?.map((v) => v.color))];
   const sizes = [...new Set(product.variations?.map((v) => v.size))];
@@ -183,18 +184,25 @@ const ProductDetailPage: React.FC = () => {
     setSelectedSize(size);
     setVariantIndex(index);
   };
-
-  if (loading) return <div className="text-center mt-8">Loading...</div>;
-  if (error)
-    return <div className="text-center mt-8 text-red-500">{error}</div>;
-  if (variantIndex === -1) return notFound();
-
-  const currentVariant = product.variations?.[variantIndex];
+  
   const selectDisplayImages = () => {
     if (currentVariant?.images) {
       return currentVariant?.images;
     }
-    return product.variations?.[0].images
+    return product.variations?.[0].images;
+  };
+  if (loading) return <div className="text-center mt-8">Loading...</div>;
+  if (error)
+    return <div className="text-center mt-8 text-red-500">{error}</div>;
+  if (variantIndex === -1) return notFound();
+  const cartItem = {
+    name : product.name,
+    product_id : product.product_id,
+    brand : product.brand,
+    category : product.category,
+    variations : product.variations[variantIndex],
+    image : selectDisplayImages()[0],
+    quantity : 1,
   }
   return (
     <div className="min-h-max px-4 md:px-8 lg:px-16 xl:px-32 2xl:px-64 relative flex flex-col lg:flex-row gap-16">
@@ -243,7 +251,7 @@ const ProductDetailPage: React.FC = () => {
           selectedSize={selectedSize}
           onSizeSelect={handleSizeSelect}
         />
-        <Add name={product.name} variant={currentVariant} image={selectDisplayImages()[0]} ></Add>
+        <Add cartItem={cartItem}></Add>
         <Divider />
         <Specifications
           description={product.description}

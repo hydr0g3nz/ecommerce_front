@@ -67,9 +67,17 @@ const CartModal: React.FC<ChildComponentProps> = ({ isOpen, setIsOpen }) => {
                             <div className="flex items-center justify-between gap-8">
                               <h3 className="font-semibold">{item.name}</h3>
                             </div>
-                            {/* <div className="text-sm text-gray-500">
-                              {item.price}
-                            </div> */}
+                            <div className="text-sm text-gray-500">
+                              {item.category}
+                            </div>
+
+                            <div className="text-sm text-gray-500">
+                              {item.variations.color}
+                            </div>
+
+                            <div className="text-sm text-gray-500">
+                              size {item.variations.size}
+                            </div>
                           </div>
                           <div className="flex justify-between text-sm">
                             <div className="p-1 bg-gray-50 rounded-sm flex items-center gap-2">
@@ -81,7 +89,7 @@ const CartModal: React.FC<ChildComponentProps> = ({ isOpen, setIsOpen }) => {
                               className="text-blue-500"
                               style={{ cursor: "pointer" }}
                               onClick={() =>
-                                handleRemove(item.product_id, item.sku)
+                                handleRemove(item.product_id, item.variations.sku)
                               }
                             >
                               Remove
@@ -96,7 +104,7 @@ const CartModal: React.FC<ChildComponentProps> = ({ isOpen, setIsOpen }) => {
                 <div className="my-2">
                   <div className="flex items-center justify-between font-semibold">
                     <span className="">Total</span>
-                    <span className="">5</span>
+                    <span className="">{cart.totalPrice}</span>
                   </div>
                   <p className="text-gray-500 text-sm mt-2 mb-4">
                     Shipping and taxes calculated at checkout.

@@ -1,12 +1,13 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Product, Variation } from '@/types/product';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Variation } from "@/types/product";
+
 export interface CartItem {
   product_id: string;
-  sku: string;
-  quantity: number;
-  price: number;
-  // Minimal display-related fields
   name: string;
+  brand: string;
+  category: string;
+  variations: Variation;
+  quantity: number;
   image: string;
 }
 
@@ -26,31 +27,45 @@ const calculateTotals = (items: CartItem[]) => {
   return items.reduce(
     (totals, item) => ({
       totalQuantity: totals.totalQuantity + item.quantity,
-      totalPrice: totals.totalPrice + item.price * item.quantity,
+      totalPrice:
+        totals.totalPrice +
+        item.variations.price *
+          (1 - (item.variations.sale / 100 || 0)) *
+          item.quantity,
     }),
     { totalQuantity: 0, totalPrice: 0 }
   );
 };
 
 const cartSlice = createSlice({
-  name: 'cart',
+  name: "cart",
   initialState,
   reducers: {
     addItem: (state, action: PayloadAction<CartItem>) => {
       const existingItemIndex = state.items.findIndex(
-        item => item.product_id === action.payload.product_id && 
-                item.sku === action.payload.sku
+        (item) =>
+          item.product_id === action.payload.product_id &&
+          item.variations.sku === action.payload.variations.sku
       );
 
       if (existingItemIndex >= 0) {
-        state.items[existingItemIndex].quantity += action.payload.quantity;
+        // Check stock limit
+        const newQuantity =
+          state.items[existingItemIndex].quantity + action.payload.quantity;
+        if (newQuantity <= action.payload.variations.stock) {
+          state.items[existingItemIndex].quantity = newQuantity;
+        }
       } else {
-        state.items.push(action.payload);
+        // Verify stock before adding
+        if (action.payload.quantity <= action.payload.variations.stock) {
+          state.items.push(action.payload);
+        }
       }
 
       const totals = calculateTotals(state.items);
       state.totalQuantity = totals.totalQuantity;
-      state.totalPrice = totals.totalPrice;
+      state.totalPrice = Math.floor(totals.totalPrice);
+
     },
 
     updateQuantity: (
@@ -62,16 +77,19 @@ const cartSlice = createSlice({
       }>
     ) => {
       const { product_id, sku, quantity } = action.payload;
-      
+
       if (quantity <= 0) {
         state.items = state.items.filter(
-          item => !(item.product_id === product_id && item.sku === sku)
+          (item) =>
+            !(item.product_id === product_id && item.variations.sku === sku)
         );
       } else {
         const item = state.items.find(
-          item => item.product_id === product_id && item.sku === sku
+          (item) =>
+            item.product_id === product_id && item.variations.sku === sku
         );
-        if (item) {
+
+        if (item && quantity <= item.variations.stock) {
           item.quantity = quantity;
         }
       }
@@ -81,10 +99,16 @@ const cartSlice = createSlice({
       state.totalPrice = totals.totalPrice;
     },
 
-    removeItem: (state, action: PayloadAction<{ product_id: string; sku: string }>) => {
+    removeItem: (
+      state,
+      action: PayloadAction<{ product_id: string; sku: string }>
+    ) => {
       state.items = state.items.filter(
-        item => !(item.product_id === action.payload.product_id && 
-                 item.sku === action.payload.sku)
+        (item) =>
+          !(
+            item.product_id === action.payload.product_id &&
+            item.variations.sku === action.payload.sku
+          )
       );
 
       const totals = calculateTotals(state.items);
@@ -100,13 +124,23 @@ const cartSlice = createSlice({
   },
 });
 
-export const { addItem, updateQuantity, removeItem, clearCart } = cartSlice.actions;
+export const { addItem, updateQuantity, removeItem, clearCart } =
+  cartSlice.actions;
 
-// // Essential selectors
-// export const selectCartItems = (state: RootState) => state.cart.items;
-// export const selectCartTotals = (state: RootState) => ({
-//   quantity: state.cart.totalQuantity,
-//   price: state.cart.totalPrice,
-// });
+// Selectors
+export const selectCartItems = (state: { cart: CartState }) => state.cart.items;
+export const selectCartTotals = (state: { cart: CartState }) => ({
+  quantity: state.cart.totalQuantity,
+  price: state.cart.totalPrice,
+});
+export const selectCartItemCount = (state: { cart: CartState }) =>
+  state.cart.totalQuantity;
+
+// Helper selectors
+export const selectCartItemBySkuAndId =
+  (product_id: string, sku: string) => (state: { cart: CartState }) =>
+    state.cart.items.find(
+      (item) => item.product_id === product_id && item.variations.sku === sku
+    );
 
 export default cartSlice.reducer;
