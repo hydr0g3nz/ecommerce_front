@@ -72,7 +72,7 @@ export default function AuthPage() {
       // Store tokens
       localStorage.setItem("accessToken", data.token.access_token);
       if (data.token.refresh_token) {
-        localStorage.setItem("refreshToken", data.refresh_token);
+        localStorage.setItem("refreshToken", data.token.refresh_token);
       }
 
       // Parse JWT to get role
@@ -156,7 +156,6 @@ export default function AuthPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Login</CardTitle>
-                  <h1>xxx{process.env.NEXT_PUBLIC_BE_DOMAIN}</h1>
                 <CardDescription>
                   Enter your credentials to access your account
                 </CardDescription>

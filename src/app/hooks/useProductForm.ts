@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Product, Variation, VariationImageBlob } from "@/types/product";
 import { Category } from "@/types/category";
+import { access } from "fs";
+import { useAuth } from "@/hooks/useAuth";
 export const useProductForm = (initialProduct: Product) => {
   const [formData, setFormData] = useState<Product>(initialProduct);
   const [deletedImages, setDeletedImages] = useState<string[]>([]);
+  const { accessToken } = useAuth();
   const beforeUploadProduct = async (): Promise<Product> => {
     let updatedProduct = { ...formData };
     if (deletedImages.length > 0) {
@@ -94,6 +97,9 @@ export const useProductForm = (initialProduct: Product) => {
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/image`,
         {
           method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
           body: formData,
         }
       );
@@ -113,6 +119,9 @@ export const useProductForm = (initialProduct: Product) => {
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/image/${filename}`,
         {
           method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
       if (!response.ok) {
@@ -125,12 +134,12 @@ export const useProductForm = (initialProduct: Product) => {
       throw error;
     }
   };
-  type  x ={
+  type x = {
     name: string;
     value: string;
-  }
+  };
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement  >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -203,8 +212,11 @@ export const useProductForm = (initialProduct: Product) => {
   };
   const deleteProduct = async (product_id: string) => {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/${ product_id}` ,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/${product_id}`,
       {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
         method: "DELETE",
       }
     );

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Product, Variation, VariationImageBlob } from "@/types/product";
 import { Category } from "@/types/category";
+import { useAuth } from "@/hooks/useAuth";
 export const useProduct = () => {
   const [product, setProduct] = useState<Product>({
     product_id: "",
@@ -16,6 +17,7 @@ export const useProduct = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [category, setCategory] = useState<Category[]>([]);
+  const {accessToken} = useAuth();
   const getProduct = async (id: string) => {
     console.log(product);
     fetchProductApi(id);
@@ -75,7 +77,7 @@ export const useProduct = () => {
   const createProductApi = async (newProduct: Product) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/product`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" ,Authorization: `Bearer ${accessToken}`},
       body: JSON.stringify(newProduct),
     });
     if (!response.ok) {
@@ -101,7 +103,7 @@ export const useProduct = () => {
     console.log("updatedProduct", updatedProduct);
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json",Authorization: `Bearer ${accessToken}`},
       body: JSON.stringify(updatedProduct),
     });
     if (!response.ok) {
