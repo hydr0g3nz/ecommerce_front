@@ -120,14 +120,14 @@ const SizeSelector = ({
 );
 
 const PriceDisplay = ({ variant }: { variant: Variation }) => {
+  if(!variant.sale){
+    variant.sale = 0
+  }
   const isSale = variant.sale != 0;
   const price = Math.floor(
     variant.price - variant.price * (variant.sale / 100)
   );
   const percent = Math.floor(variant.sale); // Since variant.sale is already a percentage
-  if (!variant || !variant.sale) {
-    return <h2 className="font-medium text-2xl">฿0</h2>;
-  }
   return !isSale ? (
     <h2 className="font-medium text-2xl">฿{Math.floor(variant.price)}</h2>
   ) : (

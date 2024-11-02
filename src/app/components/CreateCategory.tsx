@@ -12,7 +12,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter ,usePathname} from "next/navigation";
 const CreateCategory = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -28,6 +28,7 @@ const CreateCategory = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const router = useRouter();
+  const path = usePathname();
   // Sample parent categories - in real app, fetch from API
   const parentCategories = [
     { id: "1", name: "Electronics" },
@@ -78,6 +79,27 @@ const CreateCategory = () => {
     }));
   };
 
+const createCategoryApi = async (categoryData: {
+  name: string;
+  description: string;
+  product_ids: string[];
+}) => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/category`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    },
+    body: JSON.stringify(categoryData),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create category");
+  }
+
+  const createdCategory = await response.json();
+  return createdCategory;
+};
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setApiError(null);
@@ -88,16 +110,16 @@ const CreateCategory = () => {
 
     try {
       setIsLoading(true);
-
-      // In a real application, you would make an API call here
-      // const response = await fetch('/api/categories', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData),
-      // });
-
-      // Simulating API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      try {
+        await createCategoryApi({
+          name: formData.name,
+          description: formData.description,
+          product_ids: [],
+        });
+      } catch (err) {
+        setApiError("Failed to create category. Please try again.");
+        console.error("Error creating category:", err);
+      }
 
       // Reset form after successful submission
       setFormData({
@@ -113,7 +135,8 @@ const CreateCategory = () => {
         console.error("Error creating category:", err);
     } finally {
         setIsLoading(false);
-        router.refresh();
+       
+        router.back();
     }
   };
 
@@ -129,7 +152,6 @@ const CreateCategory = () => {
           </Alert>
         )}
 
-        <form  className="space-y-6" action="#">
           <div className="space-y-2">
             <label className="text-sm font-medium">Category Name</label>
             <Input
@@ -193,7 +215,6 @@ const CreateCategory = () => {
               "Create Category"
             )}
           </Button>
-        </form>
       </CardContent>
     </Card>
   );

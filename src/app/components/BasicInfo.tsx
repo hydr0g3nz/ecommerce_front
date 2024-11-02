@@ -19,7 +19,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Alert } from "./ui/alert";
 import CreateCategoryForm from "./CreateCategory";
-
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { ChevronsUpDown } from "lucide-react";
 interface BasicInfoProps {
   product: Product;
   categories: Category[];
@@ -34,7 +39,7 @@ const BasicInfo: React.FC<BasicInfoProps> = ({
   onChange,
 }) => {
   const [newCategory, setNewCategory] = React.useState("");
-
+  const [isOpen, setIsOpen] = React.useState(false);
   const handleCategoryChange = (selectedCategory: string) => {
     const simulatedEvent: React.ChangeEvent<HTMLTextAreaElement> = {
       target: {
@@ -129,7 +134,24 @@ const BasicInfo: React.FC<BasicInfoProps> = ({
               </SelectItem>
             </SelectContent>
           </Select>
-            <Label htmlFor="add-category">Add Category</Label>
+          <Collapsible
+            open={isOpen}
+            onOpenChange={setIsOpen}
+            className="w-[350px] space-y-2"
+          >
+            <div className="flex items-center justify-between space-x-4 px-4">
+              <CollapsibleTrigger asChild>
+                <Button  size="sm" className="mt-2">
+                  Add Category
+                  <ChevronsUpDown className="h-4 w-4" />
+                  <span className="sr-only">Toggle</span>
+                </Button>
+              </CollapsibleTrigger>
+            </div>
+            <CollapsibleContent className="space-y-2 w-full">
+              <CreateCategoryForm />
+            </CollapsibleContent>
+          </Collapsible>
           <div className="flex items-center gap-2">
             {/* <Input
               id="add-category"
@@ -148,7 +170,6 @@ const BasicInfo: React.FC<BasicInfoProps> = ({
             >
               Add
             </Button> */}
-            <CreateCategoryForm/>
           </div>
         </div>
       </CardContent>

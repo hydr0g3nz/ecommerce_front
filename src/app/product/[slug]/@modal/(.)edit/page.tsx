@@ -32,7 +32,10 @@ const EditProductModal: React.FC = () => {
   const { role, authloading } = useAuth();
   useEffect(() => {
     if (!authloading) {
-      if (!role) {
+      if (role !== "admin" && editDialog === false) {
+        router.back();
+      }
+      if (!role || role !== "admin") {
         router.replace('/login');
       }
     }
