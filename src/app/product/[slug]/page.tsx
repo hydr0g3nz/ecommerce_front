@@ -190,11 +190,16 @@ const ProductDetailPage: React.FC = () => {
   if (variantIndex === -1) return notFound();
 
   const currentVariant = product.variations?.[variantIndex];
-
+  const selectDisplayImages = () => {
+    if (currentVariant?.images) {
+      return currentVariant?.images;
+    }
+    return product.variations?.[0].images
+  }
   return (
     <div className="min-h-max px-4 md:px-8 lg:px-16 xl:px-32 2xl:px-64 relative flex flex-col lg:flex-row gap-16">
       <div className="flex flex-col grow lg:w-7/12 lg:sticky top-20">
-        <ProductImages images={currentVariant?.images} />
+        <ProductImages images={selectDisplayImages()} />
       </div>
 
       <div className="w-full lg:w-5/12 flex flex-col gap-6">
@@ -238,7 +243,7 @@ const ProductDetailPage: React.FC = () => {
           selectedSize={selectedSize}
           onSizeSelect={handleSizeSelect}
         />
-
+        <Add variant={currentVariant} ></Add>
         <Divider />
         <Specifications
           description={product.description}

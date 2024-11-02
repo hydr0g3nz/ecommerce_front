@@ -7,7 +7,7 @@ interface JWTPayload {
   exp: number;
 }
 
-export const useAuth = () => {
+export const useAuth = ( isNeedAuth = false) => {
   const router = useRouter();
   const [role, setRole] = useState<string | null>(null);
   const [authloading, setLoading] = useState(true);
@@ -22,29 +22,42 @@ export const useAuth = () => {
     try {
       const token = localStorage.getItem("accessToken");
       setAccessToken(token);
-      if (!token) {
+  
+      // Early return if no token exists
+      if (!token || token === "undefined") {
         console.log("No token found");
-        throw new Error("No token found");
+        handleNoToken();
+        return false;
       }
-
-      // Decode the JWT token
+  
+      // Token exists, proceed with validation
       const payload = JSON.parse(atob(token.split(".")[1])) as JWTPayload;
-
-      // Check if token is expired
+  
+      // Check token expiration
       if (payload.exp * 1000 < Date.now()) {
         console.log("Token expired");
         refreshTokenApi();
       }
+  
       console.log("payload", payload);
       setRole(payload.role);
       setLoading(false);
+      return true;
     } catch (error) {
       console.error("Error checking authentication:", error);
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
       router.push("/login");
       setLoading(false);
+      return false;
     }
+  };
+  
+  // Separate function to handle no token scenario
+  const handleNoToken = () => {
+    if (isNeedAuth) {
+      refreshTokenApi();
+      router.push("/login");
+    }
+    setLoading(false);
   };
   const refreshTokenApi = async () => {
     const refreshToken = localStorage.getItem("refreshToken");
