@@ -18,7 +18,7 @@ import { Variation } from "@/types/product";
 export default function ShoppingCartPage() {
   const dispatch = useDispatch();
   const cartItems = useSelector(selectCartItems);
-  const { price: totalPrice } = useSelector(selectCartTotals);
+  const { price: totalPrice,discount: totalDiscount } = useSelector(selectCartTotals);
 
   const handleQuantityChange = (
     productId: string,
@@ -191,24 +191,16 @@ export default function ShoppingCartPage() {
               <div className="space-y-4">
                 <div className="flex justify-between">
                   <span>Original Price</span>
-                  <span>${totalPrice.toFixed(2)}</span>
+                  <span>฿{totalPrice.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-green-600">
                   <span>Savings</span>
-                  <span>-$299.00</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Store Pickup</span>
-                  <span>$99</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Tax</span>
-                  <span>$799</span>
+                  <span>-฿{(totalDiscount).toFixed(2)}</span>
                 </div>
                 <div className="border-t pt-4">
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>
-                    <span>${(totalPrice + 99 + 799).toFixed(2)}</span>
+                    <span>฿{(totalPrice).toFixed(2)}</span>
                   </div>
                 </div>
 

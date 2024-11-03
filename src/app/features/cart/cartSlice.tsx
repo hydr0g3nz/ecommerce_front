@@ -15,12 +15,14 @@ interface CartState {
   items: CartItem[];
   totalQuantity: number;
   totalPrice: number;
+  totalDiscount: number;
 }
 
 const initialState: CartState = {
   items: [],
   totalQuantity: 0,
   totalPrice: 0,
+  totalDiscount: 0,
 };
 
 const calculateTotals = (items: CartItem[]) => {
@@ -32,11 +34,19 @@ const calculateTotals = (items: CartItem[]) => {
         item.variations.price *
           (1 - (item.variations.sale / 100 || 0)) *
           item.quantity,
+      totalDiscount:totals.totalDiscount + ((item.variations.sale / 100 || 0) * item.variations.price) * item.quantity,
     }),
-    { totalQuantity: 0, totalPrice: 0 }
+    { totalQuantity: 0, totalPrice: 0 ,totalDiscount:0}
   );
 };
-
+const calculateDiscount = (items: CartItem[]) => {
+  return items.reduce(
+    (totals, item) => ({
+      totalDiscount: totals.totalDiscount + ((item.variations.sale / 100 || 0) * item.variations.price) * item.quantity,
+    }),
+    { totalDiscount: 0 }
+  );
+}
 const cartSlice = createSlice({
   name: "cart",
   initialState,
@@ -65,6 +75,7 @@ const cartSlice = createSlice({
       const totals = calculateTotals(state.items);
       state.totalQuantity = totals.totalQuantity;
       state.totalPrice = Math.floor(totals.totalPrice);
+      state.totalDiscount=Math.floor(totals.totalDiscount)
 
     },
 
@@ -97,6 +108,7 @@ const cartSlice = createSlice({
       const totals = calculateTotals(state.items);
       state.totalQuantity = totals.totalQuantity;
       state.totalPrice = totals.totalPrice;
+      state.totalDiscount=Math.floor(totals.totalDiscount)
     },
 
     removeItem: (
@@ -114,6 +126,8 @@ const cartSlice = createSlice({
       const totals = calculateTotals(state.items);
       state.totalQuantity = totals.totalQuantity;
       state.totalPrice = totals.totalPrice;
+      state.totalDiscount=Math.floor(totals.totalDiscount)
+
     },
 
     clearCart: (state) => {
@@ -132,6 +146,7 @@ export const selectCartItems = (state: { cart: CartState }) => state.cart.items;
 export const selectCartTotals = (state: { cart: CartState }) => ({
   quantity: state.cart.totalQuantity,
   price: state.cart.totalPrice,
+  discount: state.cart.totalDiscount
 });
 export const selectCartItemCount = (state: { cart: CartState }) =>
   state.cart.totalQuantity;

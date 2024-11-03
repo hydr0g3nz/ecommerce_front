@@ -120,14 +120,15 @@ const SizeSelector = ({
 );
 
 const PriceDisplay = ({ variant }: { variant: Variation }) => {
-  if (!variant.sale) {
-    variant.sale = 0;
+  let salePercent = variant.sale;
+  if (!salePercent) {
+    salePercent = 0;
   }
-  const isSale = variant.sale != 0;
+  const isSale = salePercent != 0;
   const price = Math.floor(
-    variant.price - variant.price * (variant.sale / 100)
+    variant.price - variant.price * (salePercent / 100)
   );
-  const percent = Math.floor(variant.sale); // Since variant.sale is already a percentage
+  const percent = Math.floor(salePercent); // Since salePercent is already a percentage
   return !isSale ? (
     <h2 className="font-medium text-2xl">฿{Math.floor(variant.price)}</h2>
   ) : (
@@ -189,7 +190,7 @@ const ProductDetailPage: React.FC = () => {
     if (currentVariant?.images) {
       return currentVariant?.images;
     }
-    return product.variations?.[0].images;
+    return product.variations?.[0]?.images;
   };
   if (loading) return <div className="text-center mt-8">Loading...</div>;
   if (error)
