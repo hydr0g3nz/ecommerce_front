@@ -20,13 +20,9 @@ import StoreProvider from "@/StoreProvider";
 import { RootState } from "../../store/cartStore";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 const menu: { title: string; href: string }[] = [
-  { title: "Home", href: "/home" },
-  { title: "Sliders 1", href: "/slider-1" },
-  { title: "Sliders 2", href: "/slider-2" },
-  { title: "Blog", href: "/blog" },
-  { title: "about", href: "/about" },
-  { title: "login", href: "/login" },
-  { title: "list", href: "/list" },
+  { title: "Home", href: "/" },
+  { title: "Products", href: "/products" },
+  { title: "Login", href: "/login" },
 ];
 
 export default function NavigationMenuDemo() {

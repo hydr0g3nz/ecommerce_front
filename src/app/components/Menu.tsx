@@ -11,7 +11,7 @@ const Menu = () => {
       {isOpen && (
         <>
         <ul>
-            <li><Link href="/list">List</Link></li>
+            <li><Link href="/products">List</Link></li>
             <li><Link href="/login">Login</Link></li>
             <li><Link href="/">alpha</Link></li>
             <li><Link href="/">beta</Link></li>

@@ -69,7 +69,7 @@ const ListPage = ({ searchParams }: { searchParams: any }) => {
         </div>
       </div>
       {/* FILTER */}
-      <Filter />
+      {/* <Filter /> */}
       {/* PRODUCTS */}
       <h1 className="mt-12 text-xl font-semibold">For You!</h1>
       <ProductList products={products} />

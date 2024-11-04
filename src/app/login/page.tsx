@@ -83,9 +83,9 @@ export default function AuthPage() {
       });
       // Redirect based on role
       if (payload.role === "admin") {
-        router.push("/list");
+        router.push("/products");
       } else {
-        router.push("/list");
+        router.push("/products");
       }
     } catch (error) {
       toast({

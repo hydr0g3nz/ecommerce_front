@@ -121,7 +121,7 @@ export default function ShoppingCartPage() {
         
         if (timer <= 0) {
           clearInterval(countdownInterval);
-          router.push("/list");
+          router.push("/products");
         }
       }, 1000);
   
@@ -288,7 +288,7 @@ export default function ShoppingCartPage() {
                 </Button>
 
                 <div className="text-center">
-                  <Link href="/list">
+                  <Link href="/products">
                     <Button variant="link" className="text-blue-600">
                       Continue Shopping
                     </Button>

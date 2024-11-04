@@ -1,5 +1,5 @@
 import CategoryList from "@/components/CategoryList";
-import ProductList,{Product} from "@/components/ProductList";
+import ProductList from "@/components/ProductList";
 import Slider2 from "@/components/Slider2";
 
 const Sliders2 = () => {
