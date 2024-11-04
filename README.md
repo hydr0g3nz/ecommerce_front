@@ -3,12 +3,12 @@
 A modern e-commerce platform built with Next.js 14, TypeScript, Tailwind CSS, and shadcn/ui.
 
 ## Features
-** complete
+**complete
 - 🏷️ Product variations (size, color, etc.)
 - 🛒 Shopping cart management
 - 💫 Smooth animations and transitions
 - 🔐 User authentication and authorization
-** comming soon
+**comming soon
 - 🛍️ Product browsing and search
 - 👤 User profile management
 - 📱 Fully responsive design
