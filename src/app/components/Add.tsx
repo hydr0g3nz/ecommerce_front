@@ -1,14 +1,14 @@
 "use client";
 
-import { addItem, CartItem } from "@/features/cart/cartSlice";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { addItem, CartItem, updateQuantity } from "@/features/cart/cartSlice";
+import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 const Add = ({ cartItem }: { cartItem: CartItem }) => {
   const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  var dispatch = useAppDispatch();
-  var cartItems = useAppSelector((state) => state.cart.items);
+  var dispatch = useDispatch();
+  // var cartItems = useAppSelector((state) => state.cart.items);
   const { toast } = useToast();
   if (!cartItem) {
     return <></>;
@@ -25,14 +25,18 @@ const Add = ({ cartItem }: { cartItem: CartItem }) => {
     }
   };
   const handleAddItem = () => {
-    console.log(cartItem);
-    dispatch(addItem(cartItem));
+    let item = {
+      ...cartItem,
+      quantity: quantity,
+    };
+    dispatch(addItem(item));
     toast({
       title: "Item added to cart",
       description: "We've added the item to your cart.",
       variant: "success",
     });
   };
+
   const addItems = () => {
     // mock interval 500ms to show loading
     setTimeout(() => {
@@ -58,7 +62,7 @@ const Add = ({ cartItem }: { cartItem: CartItem }) => {
             <button
               className="cursor-pointer text-xl disabled:cursor-not-allowed disabled:opacity-20"
               onClick={() => handleQuantity("i")}
-              disabled={quantity === cartItem.variations.stock}
+              disabled={quantity === cartItem.variations.stock || cartItem.variations.stock === 0}
             >
               +
             </button>
@@ -78,7 +82,7 @@ const Add = ({ cartItem }: { cartItem: CartItem }) => {
         </div>
         <button
           onClick={() => handleAddItem()}
-          disabled={isLoading}
+          disabled={isLoading || cartItem.variations.stock === 0}
           className="w-36 text-sm rounded-3xl ring-1 ring-primary text-primary py-2 px-4 hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:bg-green-200 disabled:ring-0 disabled:text-white disabled:ring-none"
         >
           Add to Cart

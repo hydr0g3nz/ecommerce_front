@@ -88,7 +88,6 @@ const cartSlice = createSlice({
       }>
     ) => {
       const { product_id, sku, quantity } = action.payload;
-
       if (quantity <= 0) {
         state.items = state.items.filter(
           (item) =>

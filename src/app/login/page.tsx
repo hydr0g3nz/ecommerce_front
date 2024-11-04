@@ -74,10 +74,9 @@ export default function AuthPage() {
       if (data.token.refresh_token) {
         localStorage.setItem("refreshToken", data.token.refresh_token);
       }
-
       // Parse JWT to get role
       const payload = JSON.parse(atob(data.token.access_token.split(".")[1]));
-
+      localStorage.setItem("user_id", payload.user_id);
       toast({
         title: "Success",
         description: "Logged in successfully",

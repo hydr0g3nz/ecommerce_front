@@ -7,6 +7,7 @@ import {
   selectCartItems,
   selectCartTotals,
   CartItem,
+  clearCart,
 } from "@/features/cart/cartSlice";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,11 +16,29 @@ import { Heart, X, Minus, Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Variation } from "@/types/product";
+import {
+  useOrderProcessing,
+  OrderRequest,
+  OrderItem,
+  Address,
+} from "@/hooks/useOrder";
+import { Item } from "@radix-ui/react-navigation-menu";
+import { redirect, useRouter } from "next/navigation";
+import OrderProcessingDialog from "@/components/OrderProcessingAlertDialog";
+import { set } from "react-hook-form";
+import { ProcessStatus } from "@/components/OrderProcessingAlertDialog";
+import { useAuth } from "@/hooks/useAuth";
+import { time } from "console";
 export default function ShoppingCartPage() {
   const dispatch = useDispatch();
   const cartItems = useSelector(selectCartItems);
-  const { price: totalPrice,discount: totalDiscount } = useSelector(selectCartTotals);
-
+  const { price: totalPrice, discount: totalDiscount } =
+    useSelector(selectCartTotals);
+  const { submitOrder, isLoading } = useOrderProcessing();
+  const [open, setOpen] = React.useState(false);
+  const [msg, setMsg] = React.useState("");
+  const [status, setStatus] = React.useState<ProcessStatus>("processing");
+  const { role, authloading } = useAuth(true);
   const handleQuantityChange = (
     productId: string,
     sku: string,
@@ -29,15 +48,17 @@ export default function ShoppingCartPage() {
       updateQuantity({ product_id: productId, sku, quantity: newQuantity })
     );
   };
+  const router = useRouter();
   const PriceDisplay = ({ variant }: { variant: Variation }) => {
-    if (!variant.sale) {
-      variant.sale = 0;
+    let salePercent = variant.sale;
+    if (!salePercent) {
+      salePercent = 0;
     }
-    const isSale = variant.sale != 0;
+    const isSale = salePercent != 0;
     const price = Math.floor(
-      variant.price - variant.price * (variant.sale / 100)
+      variant.price - variant.price * (salePercent / 100)
     );
-    const percent = Math.floor(variant.sale); // Since variant.sale is already a percentage
+    const percent = Math.floor(salePercent); // Since salePercent is already a percentage
     return !isSale ? (
       <h2 className="font-medium text-2xl">฿{Math.floor(variant.price)}</h2>
     ) : (
@@ -53,7 +74,65 @@ export default function ShoppingCartPage() {
   const handleRemoveItem = (productId: string, sku: string) => {
     dispatch(removeItem({ product_id: productId, sku }));
   };
-
+  const handleCheckout = async () => {
+    const userId = localStorage.getItem("user_id");
+    if (!userId) {
+      router.push("/login");
+      return;
+    }
+  
+    const orderData: OrderRequest = {
+      user_id: userId,
+      shipping_address: {
+        street: "xxxx",
+        city: "xxxx",
+        state: "xxx",
+        zip: "xxxx",
+      },
+      items: cartItems.map((item) => ({
+        product_id: item.product_id,
+        sku: item.variations.sku,
+        quantity: item.quantity,
+        price: item.variations.price,
+        sale: item.variations.sale,
+      })),
+      payment_method: "cash",
+      status: "created",
+    };
+  
+    setOpen(true);
+    setMsg("กำลังส่งออเดอร์ของคุณ");
+    setStatus("processing");
+    
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    const orderResponse = await submitOrder(orderData);
+  
+    if (orderResponse) {
+      let timer = 3;
+      setOpen(true);
+      setMsg("ส่งออเดอร์สําเร็จ");
+      setStatus("success");
+      dispatch(clearCart());
+  
+      // Start countdown timer
+      const countdownInterval = setInterval(() => {
+        timer--;
+        setMsg(`กำลังกลับไปหน้าหลัก ใน ${timer} วินาที`);
+        
+        if (timer <= 0) {
+          clearInterval(countdownInterval);
+          router.push("/list");
+        }
+      }, 1000);
+  
+      // Cleanup interval if component unmounts
+      return () => clearInterval(countdownInterval);
+    } else {
+      setOpen(true);
+      setStatus("error");
+      setMsg("ส่งออเดอร์ไม่สําเร็จ");
+    }
+  };
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-semibold mb-6">Shopping Cart</h1>
@@ -195,16 +274,16 @@ export default function ShoppingCartPage() {
                 </div>
                 <div className="flex justify-between text-green-600">
                   <span>Savings</span>
-                  <span>-฿{(totalDiscount).toFixed(2)}</span>
+                  <span>-฿{totalDiscount.toFixed(2)}</span>
                 </div>
                 <div className="border-t pt-4">
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>
-                    <span>฿{(totalPrice).toFixed(2)}</span>
+                    <span>฿{totalPrice.toFixed(2)}</span>
                   </div>
                 </div>
 
-                <Button className="w-full" size="lg">
+                <Button className="w-full" size="lg" onClick={handleCheckout}>
                   Proceed to Checkout
                 </Button>
 
@@ -231,6 +310,13 @@ export default function ShoppingCartPage() {
           </Card>
         </div>
       </div>
+      <OrderProcessingDialog
+        isOpen={open}
+        status={status}
+        title="Processing Order"
+        message={msg}
+        onOpenChange={() => setOpen(false)}
+      />
     </div>
   );
 }
