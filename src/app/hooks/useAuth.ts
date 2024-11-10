@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 interface JWTPayload {
   user_id: string;
+  name: string;
   role: string;
   exp: number;
 }
@@ -10,6 +11,7 @@ interface JWTPayload {
 export const useAuth = ( isNeedAuth = false) => {
   const router = useRouter();
   const [role, setRole] = useState<string | null>(null);
+  const [name , setName] = useState<string | null>(null);
   const [authloading, setLoading] = useState(true);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
@@ -41,6 +43,7 @@ export const useAuth = ( isNeedAuth = false) => {
   
       console.log("payload", payload);
       setRole(payload.role);
+      setName(payload.name);
       setLoading(false);
       return true;
     } catch (error) {
@@ -80,5 +83,5 @@ export const useAuth = ( isNeedAuth = false) => {
     setAccessToken(data.access_token);
     setRefreshToken(data.refresh_token);
   };
-  return { role, authloading , accessToken, refreshToken};
+  return { name,role, authloading , accessToken, refreshToken};
 };
