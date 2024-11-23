@@ -40,7 +40,7 @@ interface UseOrderProcessing {
 }
 
 export const useOrderProcessing = (
-  apiUrl: string = 'http://localhost:8080/api/v1/order'
+  apiUrl: string = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/order`
 ): UseOrderProcessing => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

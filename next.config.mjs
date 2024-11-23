@@ -16,7 +16,7 @@ const nextConfig = {
       },
       {
         protocol: "http",
-        hostname: "34.126.112.22",
+        hostname: "hydr0g3nz.xyz",
       },
     ],
   },
