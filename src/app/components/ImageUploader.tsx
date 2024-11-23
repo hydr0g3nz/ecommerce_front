@@ -199,7 +199,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       </div>
 
       <Dialog open={cropDialogOpen} onOpenChange={handleDialogClose}>
-        <DialogContent style={{ maxWidth: "50vw", height: "80vh" } }>
+        <DialogContent style={{ maxWidth: "30vw", height: "auto" } }>
           <DialogHeader className="h-min-con">
             <DialogTitle>Crop Image for Variation</DialogTitle>
             <DialogDescription>
@@ -208,12 +208,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             </DialogDescription>
           </DialogHeader>
           {selectedImage && (
-            <div className="mb-4">
+            <div className="mb-4 w-full h-auto">
               <ReactCrop
                 crop={crop}
                 onChange={(c) => setCrop(c)}
                 aspect={4 / 5}
-                className="w-full h-auto"
+                className=""
               >
                 <Image
                   src={selectedImage}
@@ -221,7 +221,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                   alt="Crop preview"
                   width={0}
                   height={0}
-                  sizes="100vw"
+                  sizes="100%"
                   style={{ width: "100%", height: "auto",  }}
                 />
               </ReactCrop>

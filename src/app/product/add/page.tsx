@@ -10,15 +10,19 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 const EditProductPage: React.FC = () => {
   const {
     product,
+    category,
     loading,
     error,
     createProduct,
   } = useProduct();
+  const handleModalClose = () => {
+    
+  };
   return (
     <div className="max-w-4xl mx-auto mt-8 p-4 space-y-6">
       <h1 className="text-3xl font-bold mb-6">Add Product</h1>
 
-      <ProductForm product={product} onSubmit={createProduct} mode="create" />
+      <ProductForm product={product} categories={category} onSubmit={createProduct} mode="create" handleModalClose={handleModalClose} />
     </div>
   );
 };
