@@ -1,0 +1,50 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+
+env:
+  VERSION: ${{ github.sha }}
+  ARTIFACT_REGISTRY: asia-southeast1-docker.pkg.dev/learn-441406/ecom-front
+  REGISTRY_IMAGE: ecom-front
+
+jobs:
+  build-and-push:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      
+      - name: Configure Docker
+        run: gcloud auth configure-docker ${{ env.ARTIFACT_REGISTRY }}
+      
+      - name: Build and Push Image
+        env:
+          # Pass all environment variables to the build command
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
+          # Add any other env variables you need
+        run: |
+          # Create .env.production file
+          cat > .env.production << EOL
+          NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+          NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
+          # Add other variables as needed
+          EOL
+          
+          make cicd
+      
+      - name: Update Docker Compose Version and Restart
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          cd ${{ secrets.PROJECT_DIR }}
+          sed -i "s|asia-southeast1-docker.pkg.dev/learn-441406/ecom-front/ecom-front:[^ ]*|asia-southeast1-docker.pkg.dev/learn-441406/ecom-front/ecom-front:${SHORT_SHA}|" docker-compose.yml
+          docker compose up -d
