@@ -9,8 +9,8 @@ import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "H2O Store",
-  description: "H2O Store - The best online store in the world",
+  title: "H2O Shop",
+  description: "H2O Shop - The best online store in the world",
 };
 export const dynamic = 'force-dynamic';
 

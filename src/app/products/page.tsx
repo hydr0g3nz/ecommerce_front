@@ -1,38 +1,35 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Filter from "@/components/Filter";
 import ProductList from "@/components/ProductList";
 import Image from "next/image";
-
-const ListPage = ({ searchParams }: { searchParams: any }) => {
+import { useSearchParams } from "next/navigation";
+const ListPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const searchParams = useSearchParams();
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            // body: JSON.stringify({
-            //   product_id: "01923cde-d281-77ac-bc1c-40edc804179c",
-            //   name: "Ball"
-            // })
-          }
-        );
+        // Build the URL with category filter if present
+        let url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/`;
+        if (searchParams.get("category")) {
+          url += `?category=${searchParams.get("category")}`;
+        }
+
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
-
-        console.log(data);
         setProducts(data);
       } catch (e: any) {
         setError(e.message);
@@ -42,18 +39,23 @@ const ListPage = ({ searchParams }: { searchParams: any }) => {
     };
 
     fetchProducts();
-  }, []);
+  }, [searchParams]); // Re-fetch when searchParams changes
 
-  useEffect(() => {
-    console.log(searchParams);
-  }, [searchParams]);
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return (
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="flex justify-center items-center min-h-screen text-red-500">
+      Error: {error}
+    </div>
+  );
 
   return (
     <div className="px-4 md:px-8 lg:px-16 xl:px-32 2xl:px-64 relative">
-      {/* CAMPAIGN */}
+      {/* Campaign Banner */}
       <div className="hidden bg-pink-50 px-4 sm:flex justify-between h-64">
         <div className="w-2/3 flex flex-col items-center justify-center gap-8">
           <h1 className="text-4xl font-semibold leading-[48px] text-gray-700">
@@ -68,11 +70,17 @@ const ListPage = ({ searchParams }: { searchParams: any }) => {
           <Image src="/woman.png" alt="" fill className="object-contain" />
         </div>
       </div>
-      {/* FILTER */}
-      {/* <Filter /> */}
-      {/* PRODUCTS */}
-      <h1 className="mt-12 text-xl font-semibold">For You!</h1>
-      <ProductList products={products} />
+
+      {/* Filter Component */}
+      <Filter />
+
+      {/* Products Section */}
+      <div className="mt-8">
+        <h1 className="text-xl font-semibold mb-6">
+          {products.length === 0 ? "No products found" : "For You!"}
+        </h1>
+        <ProductList products={products} />
+      </div>
     </div>
   );
 };
