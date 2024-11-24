@@ -30,13 +30,11 @@ jobs:
         env:
           # Pass all environment variables to the build command
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
-          NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
           # Add any other env variables you need
         run: |
           # Create .env.production file
           cat > .env.production << EOL
           NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-          NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
           # Add other variables as needed
           EOL
           
