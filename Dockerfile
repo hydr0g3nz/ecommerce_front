@@ -18,7 +18,6 @@ WORKDIR /app
 # Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-COPY ./public ./public
 # Set environment variables
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
@@ -42,7 +41,7 @@ RUN adduser --system --uid 1001 nextjs
 # COPY --from=builder ../public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./.next/public
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Switch to non-root user
 USER nextjs
