@@ -28,15 +28,16 @@ import {
 import { Button } from "./ui/button";
 import { CircleUserRound, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+
 const menu: { title: string; href: string }[] = [
-  { title: "Home", href: "/" },
-  { title: "Products", href: "/products" },
+  { title: "หน้าแรก", href: "/" },
+  { title: "สินค้าทั้งหมด", href: "/products" },
 ];
 
 export default function NavigationMenuDemo() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const cart = useAppSelector((state: RootState) => state.cart);
-  const { role ,name} = useAuth();
+  const { role, name } = useAuth();
   return (
     <div className="h-20 w-full bg-base-200  flex items-center justify-center relative">
       <NavigationMenu>
@@ -72,16 +73,18 @@ export default function NavigationMenuDemo() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {role && <p>{name} , {role}</p>}
+            {role && <p>{name} - {role === "admin" ? "ผู้ดูแลระบบ" : "สมาชิก"}</p>}
             <Link href={`/admin/`}>
-             {role === "admin" &&  <DropdownMenuItem className="flex justify-between">
-                Admin
-              </DropdownMenuItem>}
+              {role === "admin" && (
+                <DropdownMenuItem className="flex justify-between">
+                  จัดการระบบ
+                </DropdownMenuItem>
+              )}
             </Link>
             {role === null ? (
               <Link href={`/login`}>
                 <DropdownMenuItem className="flex justify-between">
-                  Login
+                  เข้าสู่ระบบ
                 </DropdownMenuItem>
               </Link>
             ) : (
@@ -93,10 +96,9 @@ export default function NavigationMenuDemo() {
                   window.location.reload();
                 }}
               >
-                Logout
+                ออกจากระบบ
               </DropdownMenuItem>
-            )
-            }
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
         {/* </StoreProvider> */}
