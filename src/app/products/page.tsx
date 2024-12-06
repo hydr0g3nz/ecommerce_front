@@ -4,11 +4,22 @@ import Filter from "@/components/Filter";
 import ProductList from "@/components/ProductList";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import Link from "next/link";
+import { MoreVertical, PenLine } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 const ListPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const searchParams = useSearchParams();
+  const { role } = useAuth();
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -41,17 +52,19 @@ const ListPage = () => {
     fetchProducts();
   }, [searchParams]); // Re-fetch when searchParams changes
 
-  if (loading) return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-    </div>
-  );
-  
-  if (error) return (
-    <div className="flex justify-center items-center min-h-screen text-red-500">
-      Error: {error}
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="flex justify-center items-center min-h-screen text-red-500">
+        Error: {error}
+      </div>
+    );
 
   return (
     <div className="px-4 md:px-8 lg:px-16 xl:px-32 2xl:px-64 relative">
@@ -70,9 +83,28 @@ const ListPage = () => {
           <Image src="/woman.png" alt="" fill className="object-contain" />
         </div>
       </div>
-
-      {/* Filter Component */}
-      <Filter />
+      <div className="flex justify-between items-center">
+        <Filter />
+        {role === "admin" && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreVertical className="h-4 w-4" />
+                <span className="sr-only">More</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <Link href={`/product/add`}>
+                <DropdownMenuItem className="flex justify-between">
+                  Add product
+                  <PenLine />
+                </DropdownMenuItem>
+              </Link>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+        {/* Filter Component */}
+      </div>
 
       {/* Products Section */}
       <div className="mt-8">

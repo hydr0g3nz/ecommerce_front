@@ -170,7 +170,7 @@ const ProductDetailPage: React.FC = () => {
     index: 0,
     size: "",
   });
-  const currentVariant = product.variations[selectedVariant.index];
+  const currentVariant: Variation | null = product.variations?.[selectedVariant.index] ?? null;
 
   // Single useEffect for initial data fetching
   useEffect(() => {
@@ -198,10 +198,9 @@ const ProductDetailPage: React.FC = () => {
         size: product.variations[0].size,
       });
     }
-  }, [product?.product_id]); // Only run when product ID changes
+  }, [product.product_id]); // Only run when product ID changes
 
-  // Early returns for loading and error states
-  if (loading && currentVariant === undefined) {
+  if (loading || !product?.variations?.length || !currentVariant) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">

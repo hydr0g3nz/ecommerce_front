@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Product, Variation, VariationImageBlob } from "@/types/product";
 import { Category } from "@/types/category";
 import { useAuth } from "@/hooks/useAuth";
+import Variations from "@/components/Variations";
 export const useProduct = () => {
   const [product, setProduct] = useState<Product>({
     product_id: "",
