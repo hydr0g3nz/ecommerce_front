@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 // Types for our authentication
 interface AuthResponse {
   access_token: string;
@@ -36,6 +37,7 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
+  const auth = useAuth();
   // Login form state
   const [loginCredentials, setLoginCredentials] = useState<UserCredentials>({
     email: "",
@@ -55,13 +57,16 @@ export default function AuthPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(loginCredentials),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(loginCredentials),
+        }
+      );
 
       const data = await response.json();
       console.log("data", data.token.access_token);
@@ -104,13 +109,16 @@ export default function AuthPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(registerCredentials),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(registerCredentials),
+        }
+      );
 
       const data = await response.json();
 

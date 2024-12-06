@@ -1,93 +1,138 @@
 import { useState } from "react";
-import { Product, Variation, VariationImageBlob } from "@/types/product";
-import { Category } from "@/types/category";
-import { access } from "fs";
+import { Product, Variation } from "@/types/product";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+
 export const useProductForm = (initialProduct: Product) => {
+  // State management
   const [formData, setFormData] = useState<Product>(initialProduct);
   const [deletedImages, setDeletedImages] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState<{
+    upload: boolean;
+    delete: boolean;
+    imageUpload: boolean;
+    imageDelete: boolean;
+  }>({
+    upload: false,
+    delete: false,
+    imageUpload: false,
+    imageDelete: false,
+  });
+  
+  // Hooks
   const { accessToken } = useAuth();
-  const beforeUploadProduct = async (): Promise<Product> => {
-    let updatedProduct = { ...formData };
-    if (deletedImages.length > 0) {
-      try {
-        await Promise.all(
-          deletedImages.map((filename) => deleteProductImage(filename))
-        );
-      } catch (error) {
-        console.error("Error deleting images:", error);
-        if (error) {
-          const response = error as Response;
-          if (response.status >= 500) {
-            throw error;
-          }
-        }
-      }
-    }
-    const uploadedImageIds = await Promise.all(
-      formData.variations?.map((v) =>
-        Promise.all(v.blobs?.map((b) => uploadProductImage(b)))
-      )
-    );
-    for (let i = 0; i < formData.variations.length; i++) {
-      const variation = formData.variations[i];
-      const updatedVariation = {
-        ...variation,
-        images: [...variation.images, ...uploadedImageIds[i]],
-        blobs: [],
-      };
-      updatedProduct = {
-        ...updatedProduct,
-        variations: updatedProduct.variations.map((v, j) =>
-          i === j ? updatedVariation : v
-        ),
-      };
-    }
-    setFormData((prev) => ({
-      ...prev,
-      ...updatedProduct,
-    }));
-    return updatedProduct;
-  };
-  const handleDeleteProduct = async () => {
-    try {
-      await Promise.all(
-        formData.variations.map((v) => {
-          try {
-            return Promise.all(v.images.map((i) => deleteProductImage(i)));
-          } catch (error) {
-            console.error("Error deleting images:", error);
-            if (error) {
-              const response = error as Response;
-              if (response.status >= 500) {
-                throw error;
-              }
-            }
-          }
-        })
-      );
-    } catch (error) {
-      console.error("Error deleting images:", error);
-      if (error) {
-        const response = error as Response;
-        if (response.status >= 500) {
-          throw error;
-        }
-      }
-    }
+  const { toast } = useToast();
 
-    try {
-      await deleteProduct(formData.product_id);
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      if (error) {
-        const response = error as Response;
-        if (response.status >= 500) {
-          throw error;
-        }
-      }
+  // Helper function to handle errors
+  const handleError = (error: unknown, context: string) => {
+    console.error(`Error in ${context}:`, error);
+    
+    let errorMessage = "An unexpected error occurred";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    
+    // Show error toast
+    toast({
+      variant: "destructive",
+      title: `Error ${context}`,
+      description: errorMessage,
+    });
+
+    // Handle server errors
+    if (error && (error as Response).status >= 500) {
+      throw error;
     }
   };
+
+  const beforeUploadProduct = async (): Promise<Product> => {
+    setIsLoading(prev => ({ ...prev, upload: true }));
+    let updatedProduct = { ...formData };
+    
+    try {
+      // Handle deleted images
+      if (deletedImages.length > 0) {
+        setIsLoading(prev => ({ ...prev, imageDelete: true }));
+        try {
+          await Promise.all(
+            deletedImages.map((filename) => deleteProductImage(filename))
+          );
+          toast({
+            title: "Images deleted",
+            description: `Successfully deleted ${deletedImages.length} images`,
+          });
+        } catch (error) {
+          handleError(error, "deleting images");
+        } finally {
+          setIsLoading(prev => ({ ...prev, imageDelete: false }));
+        }
+      }
+
+      // Upload new images
+      setIsLoading(prev => ({ ...prev, imageUpload: true }));
+      const uploadedImageIds = await Promise.all(
+        formData.variations?.map((v) =>
+          Promise.all(v.blobs?.map((b) => uploadProductImage(b)))
+        )
+      );
+
+      // Update product with new image IDs
+      for (let i = 0; i < formData.variations.length; i++) {
+        const variation = formData.variations[i];
+        const updatedVariation = {
+          ...variation,
+          images: [...variation.images, ...uploadedImageIds[i]],
+          blobs: [],
+        };
+        updatedProduct = {
+          ...updatedProduct,
+          variations: updatedProduct.variations.map((v, j) =>
+            i === j ? updatedVariation : v
+          ),
+        };
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        ...updatedProduct,
+      }));
+
+      return updatedProduct;
+    } catch (error) {
+      handleError(error, "updating product");
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, upload: false, imageUpload: false }));
+    }
+  };
+
+  const handleDeleteProduct = async () => {
+    setIsLoading(prev => ({ ...prev, delete: true }));
+    
+    try {
+      // Delete associated images first
+      setIsLoading(prev => ({ ...prev, imageDelete: true }));
+      await Promise.all(
+        formData.variations.map((v) =>
+          Promise.all(v.images.map((i) => deleteProductImage(i)))
+        )
+      );
+      
+      // Delete the product
+      await deleteProduct(formData.product_id);
+      
+      toast({
+        title: "Product deleted",
+        description: "Successfully deleted product and associated images",
+      });
+    } catch (error) {
+      handleError(error, "deleting product");
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, delete: false, imageDelete: false }));
+    }
+  };
+
   const uploadProductImage = async (image: Blob): Promise<string> => {
     const formData = new FormData();
     formData.append("image", image, "cropped_image.jpg");
@@ -103,16 +148,19 @@ export const useProductForm = (initialProduct: Product) => {
           body: formData,
         }
       );
+      
       if (!response.ok) {
         throw new Error("Failed to upload image");
       }
+      
       const data = await response.json();
       return data.filename;
     } catch (error) {
-      console.error("Error uploading image:", error);
+      handleError(error, "uploading image");
       throw error;
     }
   };
+
   const deleteProductImage = async (filename: string): Promise<string> => {
     try {
       const response = await fetch(
@@ -124,26 +172,24 @@ export const useProductForm = (initialProduct: Product) => {
           },
         }
       );
+      
       if (!response.ok) {
-        throw new Error("Failed to upload image");
+        throw new Error("Failed to delete image");
       }
+      
       const data = await response.json();
       return data.filename;
     } catch (error) {
-      console.error("Error uploading image:", error);
+      handleError(error, "deleting image");
       throw error;
     }
   };
-  type x = {
-    name: string;
-    value: string;
-  };
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    console.log(name, value);
   };
 
   const handleSpecificationChange = (key: string, value: string) => {
@@ -167,7 +213,6 @@ export const useProductForm = (initialProduct: Product) => {
 
   const addVariation = () => {
     setFormData((prev) => {
-      // const newVariations = [...prev.variations];
       const emptyVariation = {
         sku: "",
         price: 0,
@@ -180,6 +225,11 @@ export const useProductForm = (initialProduct: Product) => {
       };
       return { ...prev, variations: [...prev.variations, emptyVariation] };
     });
+    
+    toast({
+      title: "Variation added",
+      description: "New variation has been added to the product",
+    });
   };
 
   const removeVariation = (index: number) => {
@@ -188,6 +238,11 @@ export const useProductForm = (initialProduct: Product) => {
       ...prev,
       variations: prev.variations.filter((_, i) => i !== index),
     }));
+    
+    toast({
+      title: "Variation removed",
+      description: "Variation has been removed from the product",
+    });
   };
 
   const addSpecification = () => {
@@ -203,13 +258,25 @@ export const useProductForm = (initialProduct: Product) => {
       delete newSpecs[key];
       return { ...prev, specifications: newSpecs };
     });
+    
+    toast({
+      title: "Specification removed",
+      description: `Specification "${key}" has been removed`,
+    });
   };
+
   const removeImage = (varIdx: number, imgIdx: number) => {
     setDeletedImages((prev) => [
       ...prev,
       formData.variations[varIdx].images[imgIdx],
     ]);
+    
+    toast({
+      title: "Image marked for deletion",
+      description: "Image will be deleted when saving the product",
+    });
   };
+
   const deleteProduct = async (product_id: string) => {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/${product_id}`,
@@ -220,6 +287,7 @@ export const useProductForm = (initialProduct: Product) => {
         method: "DELETE",
       }
     );
+    
     if (!response.ok) {
       throw new Error("Failed to delete product");
     }
@@ -227,6 +295,7 @@ export const useProductForm = (initialProduct: Product) => {
 
   return {
     formData,
+    isLoading,
     handleInputChange,
     handleSpecificationChange,
     handleVariationChange,

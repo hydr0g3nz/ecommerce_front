@@ -45,6 +45,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     beforeUploadProduct,
     removeImage,
     handleDeleteProduct,
+    isLoading,
   } = useProductForm(product);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
@@ -63,7 +64,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
     handleDeleteProduct();
     handleModalClose();
   };
-
+  if (isLoading.delete || isLoading.imageDelete || isLoading.upload || isLoading.imageUpload) {
+    return <div>Loading...</div>;
+  }
   return (
     <form  className="space-y-6">
       <Card>

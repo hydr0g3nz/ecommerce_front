@@ -3,6 +3,7 @@ import { Product, Variation, VariationImageBlob } from "@/types/product";
 import { Category } from "@/types/category";
 import { useAuth } from "@/hooks/useAuth";
 import Variations from "@/components/Variations";
+import { toast } from "./use-toast";
 export const useProduct = () => {
   const [product, setProduct] = useState<Product>({
     product_id: "",
@@ -18,11 +19,11 @@ export const useProduct = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [category, setCategory] = useState<Category[]>([]);
-  const {accessToken} = useAuth();
+  const { accessToken } = useAuth();
   const getProduct = async (id: string) => {
     console.log(product);
     fetchProductApi(id);
-    fetchCategoryApi()
+    fetchCategoryApi();
   };
 
   const fetchProductApi = async (productId: string) => {
@@ -41,14 +42,18 @@ export const useProduct = () => {
       setError("Failed to load product. Please try again.");
     } finally {
       setLoading(false);
+      console.log("loading false");
     }
   };
   const fetchCategoryApi = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/category`, {
-        method: "GET",
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/category`,
+        {
+          method: "GET",
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch category");
       }
@@ -60,6 +65,7 @@ export const useProduct = () => {
       setError("Failed to load category. Please try again.");
     } finally {
       setLoading(false);
+      console.log("loading false");
     }
   };
   const createProduct = async (addProduct: Product) => {
@@ -71,20 +77,31 @@ export const useProduct = () => {
       console.error("Error creating product:", error);
       setError("Failed to create product. Please try again.");
     } finally {
+      toast({
+        title: "Success",
+        description: "Product created successfully",
+      });
+
       setLoading(false);
     }
   };
 
   const createProductApi = async (newProduct: Product) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/product`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" ,Authorization: `Bearer ${accessToken}`},
-      body: JSON.stringify(newProduct),
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/product`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(newProduct),
+      }
+    );
     if (!response.ok) {
       throw new Error("Failed to create product");
     }
-    const createdProduct = await response.json();
+    const createdProduct = await response.text();
     return createdProduct;
   };
   const updateProduct = async (product: Product) => {
@@ -96,17 +113,27 @@ export const useProduct = () => {
       setError("Failed to update product. Please try again.");
     } finally {
       setProduct((prevProduct) => ({ ...prevProduct, ...product }));
+      toast({
+        title: "Success",
+        description: "Product updated successfully",
+      })
       setLoading(false);
     }
   };
 
   const updateProductApi = async (updatedProduct: Product) => {
     console.log("updatedProduct", updatedProduct);
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json",Authorization: `Bearer ${accessToken}`},
-      body: JSON.stringify(updatedProduct),
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(updatedProduct),
+      }
+    );
     if (!response.ok) {
       throw new Error("Failed to update product");
     }
@@ -121,5 +148,6 @@ export const useProduct = () => {
     getProduct,
     createProduct,
     updateProduct,
+    fetchCategoryApi,
   };
 };
