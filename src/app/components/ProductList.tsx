@@ -26,6 +26,9 @@ const ProductPrice = ({ price,sale }: { price: number; sale: number }) => {
   );
 };
 const ProductDetail = ({ product }: { product: ProductCache }) => {
+  if (!product) {
+    return null;
+  }
   return (
     <div className="flex flex-col gap-2">
       <p className="font-bold text-md">{product.name}</p>
