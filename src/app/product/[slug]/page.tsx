@@ -170,6 +170,7 @@ const ProductDetailPage: React.FC = () => {
     index: 0,
     size: "",
   });
+  const currentVariant = product.variations[selectedVariant.index];
 
   // Single useEffect for initial data fetching
   useEffect(() => {
@@ -200,7 +201,7 @@ const ProductDetailPage: React.FC = () => {
   }, [product?.product_id]); // Only run when product ID changes
 
   // Early returns for loading and error states
-  if (loading) {
+  if (loading && currentVariant === undefined) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -221,14 +222,13 @@ const ProductDetailPage: React.FC = () => {
     );
   }
 
-  if (!product || selectedVariant.index === -1) {
-    return notFound();
-  }
+  // if (!product || selectedVariant.index === -1) {
+  //   return notFound();
+  // }
 
-  const currentVariant = product.variations[selectedVariant.index];
-  if (!currentVariant) {
-    return notFound();
-  }
+  // if (!currentVariant) {
+  //   return notFound();
+  // }
 
   const colors = Array.from(new Set(product.variations.map((v) => v.color)));
   const displayImages = currentVariant?.images || product.variations[0]?.images || [];
