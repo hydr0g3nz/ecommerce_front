@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   updateQuantity,
@@ -38,7 +38,10 @@ export default function ShoppingCartPage() {
   const [open, setOpen] = React.useState(false);
   const [msg, setMsg] = React.useState("");
   const [status, setStatus] = React.useState<ProcessStatus>("processing");
-  const { role, authloading } = useAuth(true);
+  const { role, loading } = useAuth(true);
+  useEffect(() => {
+    if (!role) router.push("/login?redirect=/cart");
+  }, [role]);
   const handleQuantityChange = (
     productId: string,
     sku: string,
@@ -80,7 +83,7 @@ export default function ShoppingCartPage() {
       router.push("/login");
       return;
     }
-  
+
     const orderData: OrderRequest = {
       user_id: userId,
       shipping_address: {
@@ -99,32 +102,32 @@ export default function ShoppingCartPage() {
       payment_method: "cash",
       status: "created",
     };
-  
+
     setOpen(true);
     setMsg("กำลังส่งออเดอร์ของคุณ");
     setStatus("processing");
-    
+
     await new Promise((resolve) => setTimeout(resolve, 2000));
     const orderResponse = await submitOrder(orderData);
-  
+
     if (orderResponse) {
       let timer = 3;
       setOpen(true);
       setMsg("ส่งออเดอร์สําเร็จ");
       setStatus("success");
       dispatch(clearCart());
-  
+
       // Start countdown timer
       const countdownInterval = setInterval(() => {
         timer--;
         setMsg(`กำลังกลับไปหน้าหลัก ใน ${timer} วินาที`);
-        
+
         if (timer <= 0) {
           clearInterval(countdownInterval);
           router.push("/products");
         }
       }, 1000);
-  
+
       // Cleanup interval if component unmounts
       return () => clearInterval(countdownInterval);
     } else {

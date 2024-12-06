@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter,useSearchParams } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -34,6 +34,8 @@ interface RegisterCredentials extends UserCredentials {
 
 export default function AuthPage() {
   const router = useRouter();
+  const routerRedirect = useSearchParams();
+  const  redirect = routerRedirect.get("redirect") ;
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
@@ -86,9 +88,9 @@ export default function AuthPage() {
         title: "Success",
         description: "Logged in successfully",
       });
-      // Redirect based on role
-      if (payload.role === "admin") {
-        router.push("/products");
+      console.log("redirect", redirect);
+      if (redirect) {
+        router.push(redirect as string);
       } else {
         router.push("/products");
       }
