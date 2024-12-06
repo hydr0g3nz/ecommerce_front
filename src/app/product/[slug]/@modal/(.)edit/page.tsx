@@ -29,7 +29,7 @@ const EditProductModal: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const id = pathname?.split("/")[2];
-  const { role, authloading } = useAuth(true);
+  const { role, loading: authloading } = useAuth(true);
   useEffect(() => {
     if (!authloading) {
       if (role !== "admin" && editDialog === false) {
