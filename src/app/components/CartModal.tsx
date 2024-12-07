@@ -17,9 +17,7 @@ interface ChildComponentProps {
 
 const CartModal: React.FC<ChildComponentProps> = ({ isOpen, setIsOpen }) => {
   const t = new Date();
-  console.log(t);
   useEffect(() => {
-    console.log("CartModal re-rendered due to state or props change");
   });
   const cart = useAppSelector((state: RootState) => state.cart);
   const dispatch = useAppDispatch();

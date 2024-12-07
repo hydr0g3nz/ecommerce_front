@@ -71,7 +71,6 @@ export default function AuthPage() {
       );
 
       const data = await response.json();
-      console.log("data", data.token.access_token);
       if (!response.ok) {
         throw new Error(data.message || "Login failed");
       }
@@ -88,7 +87,6 @@ export default function AuthPage() {
         title: "Success",
         description: "Logged in successfully",
       });
-      console.log("redirect", redirect);
       if (redirect) {
         router.push(redirect as string);
       } else {
@@ -100,7 +98,6 @@ export default function AuthPage() {
         description: error instanceof Error ? error.message : "Failed to login",
         variant: "destructive",
       });
-      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -139,7 +136,7 @@ export default function AuthPage() {
         description: "Registered successfully",
       });
 
-      router.push("/dashboard");
+      router.push("/products");
     } catch (error) {
       toast({
         title: "Error",

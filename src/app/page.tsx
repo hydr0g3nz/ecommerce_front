@@ -28,7 +28,6 @@ const Sliders2 = () => {
 
       const data = await response.json();
 
-      console.log(data);
       setProducts(data);
     } catch (e: any) {
       setError(e.message);
@@ -54,7 +53,6 @@ const Sliders2 = () => {
 
       const data = await response.json();
 
-      console.log(data);
       setProductsCategoryDelegate(data.categories);
     } catch (e: any) {
       setError(e.message);

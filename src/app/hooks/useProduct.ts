@@ -21,7 +21,6 @@ export const useProduct = () => {
   const [category, setCategory] = useState<Category[]>([]);
   const { accessToken } = useAuth();
   const getProduct = async (id: string) => {
-    console.log(product);
     fetchProductApi(id);
     fetchCategoryApi();
   };
@@ -38,11 +37,9 @@ export const useProduct = () => {
       const data = await response.json();
       setProduct((prevProduct) => ({ ...prevProduct, ...data }));
     } catch (error) {
-      console.error("Error fetching product:", error);
       setError("Failed to load product. Please try again.");
     } finally {
       setLoading(false);
-      console.log("loading false");
     }
   };
   const fetchCategoryApi = async () => {
@@ -59,22 +56,17 @@ export const useProduct = () => {
       }
       const data = await response.json();
       setCategory(data);
-      console.log(data);
     } catch (error) {
-      console.error("Error fetching category:", error);
       setError("Failed to load category. Please try again.");
     } finally {
       setLoading(false);
-      console.log("loading false");
     }
   };
   const createProduct = async (addProduct: Product) => {
     try {
       setLoading(true);
-      console.log(addProduct);
       await createProductApi(addProduct);
     } catch (error) {
-      console.error("Error creating product:", error);
       setError("Failed to create product. Please try again.");
     } finally {
       toast({
@@ -109,7 +101,6 @@ export const useProduct = () => {
       setLoading(true);
       await updateProductApi(product);
     } catch (error) {
-      console.error("Error updating product:", error);
       setError("Failed to update product. Please try again.");
     } finally {
       setProduct((prevProduct) => ({ ...prevProduct, ...product }));
@@ -122,7 +113,6 @@ export const useProduct = () => {
   };
 
   const updateProductApi = async (updatedProduct: Product) => {
-    console.log("updatedProduct", updatedProduct);
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/`,
       {

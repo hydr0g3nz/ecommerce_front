@@ -73,7 +73,11 @@ export default function NavigationMenuDemo() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {role && <p>{name} - {role === "admin" ? "ผู้ดูแลระบบ" : "สมาชิก"}</p>}
+            {role && (
+              <p>
+                {name} - {role === "admin" ? "ผู้ดูแลระบบ" : "สมาชิก"}
+              </p>
+            )}
             <Link href={`/admin/`}>
               {role === "admin" && (
                 <DropdownMenuItem className="flex justify-between">
@@ -81,23 +85,33 @@ export default function NavigationMenuDemo() {
                 </DropdownMenuItem>
               )}
             </Link>
+
             {role === null ? (
-              <Link href={`/login`}>
-                <DropdownMenuItem className="flex justify-between">
-                  เข้าสู่ระบบ
-                </DropdownMenuItem>
-              </Link>
+              <>
+                <Link href={`/login`}>
+                  <DropdownMenuItem className="flex justify-between">
+                    เข้าสู่ระบบ
+                  </DropdownMenuItem>
+                </Link>
+              </>
             ) : (
-              <DropdownMenuItem
-                className="flex justify-between"
-                onClick={() => {
-                  localStorage.removeItem("accessToken");
-                  localStorage.removeItem("refreshToken");
-                  window.location.reload();
-                }}
-              >
-                ออกจากระบบ
-              </DropdownMenuItem>
+              <>
+                <Link href={`/orders`}>
+                  <DropdownMenuItem className="flex justify-between">
+                    รายการสั่งซื้อ
+                  </DropdownMenuItem>
+                </Link>
+                <DropdownMenuItem
+                  className="flex justify-between"
+                  onClick={() => {
+                    localStorage.removeItem("accessToken");
+                    localStorage.removeItem("refreshToken");
+                    window.location.reload();
+                  }}
+                >
+                  ออกจากระบบ
+                </DropdownMenuItem>
+              </>
             )}
           </DropdownMenuContent>
         </DropdownMenu>

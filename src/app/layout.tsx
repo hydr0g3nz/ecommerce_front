@@ -5,14 +5,14 @@ import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
 import { Provider } from "react-redux";
 import StoreProvider from "./StoreProvider";
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "H2O Shop",
   description: "H2O Shop - The best online store in the world",
 };
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default function RootLayout({
   children,
@@ -24,7 +24,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <StoreProvider>
           <Navbar />
-          {children}
+          <main className="flex min-h-svh flex-1 flex-col">{children}</main>
           <Footer />
         </StoreProvider>
         <Toaster />
