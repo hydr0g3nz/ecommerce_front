@@ -128,7 +128,6 @@ const createCategoryApi = async (categoryData: {
         parentId: "",
       });
 
-      console.log("Category created:", formData);
 
     } catch (err) {
         setApiError("Failed to create category. Please try again.");
