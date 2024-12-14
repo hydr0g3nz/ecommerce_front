@@ -12,12 +12,14 @@ const EmptyOrdersState = () => {
           No Orders Found
         </h3>
         <p className="text-gray-500 mb-6">
-          Looks like you haven't placed any orders yet. Start shopping to see your orders here!
+          {"Looks like you haven't placed any orders yet. Start shopping to see your orders here!"}
         </p>
         <Button
           onClick={() => window.location.href = '/products'}
           className="bg-primary hover:bg-primary/90"
         >
+
+            
           Browse Products
         </Button>
       </CardContent>
