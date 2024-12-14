@@ -103,7 +103,7 @@ const EmptyState = () => (
       No orders found
     </h3>
     <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-      You haven't placed any orders yet. Start shopping to see your orders here.
+      {"You haven't placed any orders yet. Start shopping to see your orders here."}
     </p>
     <Button className="mt-4" size="sm">
       Start Shopping

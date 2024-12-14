@@ -1,63 +1,41 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Product } from "@/types/product";
-import { useProduct } from "@/hooks/useProduct";
-import ProductForm from "@/components/ProductForm";
-import ImageUploader from "@/components/ImageUploader";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import EditProduct from "@/components/EditProduct";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/hooks/useAuth";
+import EditProduct from "@/components/EditProduct";
+
 const EditProductModal: React.FC = () => {
-  const [editDialog, setEditDialog] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
   const id = pathname?.split("/")[2];
-  const { role, loading: authloading } = useAuth(true);
-  useEffect(() => {
-    if (!authloading) {
-      if (role !== "admin" && editDialog === false) {
-        router.back();
-      }
-      if (!role || role !== "admin") {
-        router.replace('/login');
-      }
-    }
-  }, [role, authloading]);
-  if (authloading) {
-    return <div>Loading...</div>; // You can replace this with a proper loading component
-  }
-  const onClose = () => {
-    setEditDialog(!editDialog);
-    router.back();
-    // router.refresh();
+  
+  // Remove auth check from component level
+  const { role } = useAuth();
+
+  const handleClose = () => {
+    router.push('/products'); // Navigate directly to products page instead of using router.back()
   };
+
+  // Don't render anything if no id
+  if (!id) {
+    router.push('/products');
+    return null;
+  }
+  if (role != "admin"){
+    router.back()
+  }
   return (
-    <Dialog open={editDialog} onOpenChange={onClose}>
-      <DialogTrigger />
-      <DialogContent style={{maxWidth: "70vw"}}>
+    <Dialog defaultOpen onOpenChange={handleClose}>
+      <DialogContent className="max-w-[70vw]">
         <DialogHeader>
           <DialogTitle className="text-center text-3xl">Edit Product</DialogTitle>
         </DialogHeader>
-        <ScrollArea style={{ height: "80vh" }}>
+        <ScrollArea className="h-[80vh]">
           <div className="m-4">
-            <EditProduct handleModalClose={onClose} />
+            <EditProduct  handleModalClose={handleClose} />
           </div>
         </ScrollArea>
       </DialogContent>
