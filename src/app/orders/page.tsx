@@ -2,12 +2,14 @@
 import { useEffect, useState } from "react";
 import OrderList, { Order } from "@/components/OrderList";
 import { useAuth } from "@/hooks/useAuth";
+import EmptyOrdersState from "@/components/EmptyOrderState";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { accessToken, loading: authLoading } = useAuth(true);
+
   useEffect(() => {
     if (authLoading) {
       return;
@@ -19,7 +21,7 @@ export default function OrdersPage() {
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/orders`,
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`, // Get from auth context
+              Authorization: `Bearer ${accessToken}`,
             },
           }
         );
@@ -29,11 +31,13 @@ export default function OrdersPage() {
         }
 
         const data: Order[] = await res.json();
-        setOrders(
-          data.sort((a, b) =>
-            new Date(b.date).getTime() - new Date(a.date).getTime()
-          )
-        );
+        if (data?.length > 0) {
+          setOrders(
+            data.sort(
+              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+            )
+          );
+        }
         setOrders(data);
       } catch (error: any) {
         setError(error.message || "An unexpected error occurred");
@@ -42,7 +46,7 @@ export default function OrdersPage() {
       }
     }
     fetchOrders();
-  }, [authLoading]);
+  }, [authLoading, accessToken]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -52,11 +56,9 @@ export default function OrdersPage() {
     return <div>Error: {error}</div>;
   }
 
-  return orders ? (
-    <>
-      <OrderList orders={orders} />
-    </>
+  return orders?.length ? (
+    <OrderList orders={orders} />
   ) : (
-    <div>No orders found</div>
+    <EmptyOrdersState />
   );
 }
